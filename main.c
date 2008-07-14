@@ -1,4 +1,4 @@
-#include "decompile.h"
+#include "opsoup.h"
 
 #define OUTPUT_FILE         "ttdx.asm"
 #define OUTPUT_STUB         "ttdx_stub.c"

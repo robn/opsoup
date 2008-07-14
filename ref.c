@@ -1,4 +1,4 @@
-#include "decompile.h"
+#include "opsoup.h"
 
 ref_t *ref = NULL;
 int nref = 0, sref = 0;

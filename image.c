@@ -1,4 +1,4 @@
-#include "decompile.h"
+#include "opsoup.h"
 
 #define IMAGE_FILE          "gamegfx.exe"
 

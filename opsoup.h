@@ -1,5 +1,5 @@
-#ifndef DECOMPILE_H
-#define DECOMPILE_H 1
+#ifndef OPSOUP_H
+#define OPSOUP_H 1
 
 #include <stdio.h>
 #include <string.h>

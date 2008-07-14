@@ -1,4 +1,4 @@
-#include "decompile.h"
+#include "opsoup.h"
 
 label_t *label = NULL;
 int nlabel = 0, slabel = 0;

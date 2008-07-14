@@ -1,4 +1,4 @@
-#include "decompile.h"
+#include "opsoup.h"
 
 void data_output(FILE *f) {
     int i, j, s, nc, is, nl, dbc, len;

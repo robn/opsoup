@@ -14,9 +14,9 @@ NASM_OBJECTS = \
 	$(NASM_PATH)/regs.o \
 	$(NASM_PATH)/sync.o \
 
-HEADERS = decompile.h
+HEADERS = opsoup.h
 
-BINNAME = decompile
+BINNAME = opsoup
 
 all: $(OBJECTS) $(NASM_OBJECTS) $(HEADERS)
 	$(CC) $(CFLAGS) -o $(BINNAME) $(OBJECTS) $(NASM_OBJECTS) $(LDFLAGS)
