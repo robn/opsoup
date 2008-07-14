@@ -67,7 +67,7 @@ ref_t *ref_insert(uint32_t off, uint32_t target) {
 
     /* fail if we can't add any more targets */
     if(ref[i].ntarget == MAX_REF_TARGET) {
-        if(verbose)
+        if(o.verbose)
             printf("  more than %d targets for label ref 0x%x\n", MAX_REF_TARGET, off);
         return &(ref[i]);
     }

@@ -76,7 +76,7 @@ label_t *label_insert(uint32_t target, label_type_t type, segment_t *s) {
     }
 
     else if((type & ~0xf) > (label[i].type & ~0xf)) {
-        if(verbose)
+        if(o.verbose)
             printf("  upgrading 0x%x from %02x to %02x\n", target, label[i].type, type);
         label[i].type = type;
         upgraded++;
@@ -137,7 +137,7 @@ void label_reloc_upgrade(void) {
 
     for(i = 0; i < nlabel; i++) {
         if(!(label[i].type & label_RELOC)) continue;
-        if(verbose)
+        if(o.verbose)
             printf("  upgrading 0x%x from %02x to %02x\n", label[i].target, label[i].type, label_DATA);
         label[i].type = label_DATA;
         upgraded++;

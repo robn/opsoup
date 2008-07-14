@@ -11,13 +11,6 @@
 #include "disasm.h"
 #include "sync.h"
 
-
-/* set to 1 to get more logging */
-extern int              verbose;
-
-
-/* segments */
-
 /* segment types */
 typedef enum {
     seg_NONE = 0,
@@ -31,18 +24,31 @@ typedef enum {
 /* segment data */
 typedef struct segment_st {
     char            *name;          /* segment name, for printing */
-    segment_type_t  type;           /* type */
-    uint32_t        coff;           /* core offset (ie memory location where segment starts) */
-    uint32_t        size;           /* size (in core) */
-    uint32_t        foff;           /* file offset (ie file location to load segment from) */
-    uint32_t        cend;           /* end of segment (calculated by image_load()) */
+    segment_type_t   type;          /* type */
+    uint32_t         coff;          /* core offset (ie memory location where segment starts) */
+    uint32_t         size;          /* size (in core) */
+    uint32_t         foff;          /* file offset (ie file location to load segment from) */
+    uint32_t         cend;          /* end of segment (calculated by image_load()) */
 } segment_t;
 
-extern uint8_t      *core;
-extern segment_t    segment[];
+typedef struct _image_st {
+    uint8_t         *core;
+    uint32_t         size;
+    segment_t       *segment;
+} image_t;
+
+typedef struct _opsoup_st {
+    image_t          image;
+
+    int              verbose;
+} opsoup_t;
+
+extern opsoup_t o;
+
 
 int         image_load(void);
 segment_t   *image_seg_find(uint32_t off);
+
 
 /* relocations */
 

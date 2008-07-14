@@ -8,27 +8,27 @@ void import_process(void) {
     label_t *l;
 
     /* process each import segment (can there be more than one)? */
-    for(i = 0; segment[i].name != NULL; i++) {
-        if(segment[i].type != seg_IMPORT) continue;
+    for(i = 0; o.image.segment[i].name != NULL; i++) {
+        if(o.image.segment[i].type != seg_IMPORT) continue;
 
-        printf("import: processing segment '%s'\n", segment[i].name);
+        printf("import: processing segment '%s'\n", o.image.segment[i].name);
 
-        pos = segment[i].coff;
-        while(pos < segment[i].coff + segment[i].size) {
-            rva = * (uint32_t *) (core + pos); pos += 12;
-            dllname = (char *) core + * (uint32_t *) (core + pos); pos += 4;
-            itable = * (uint32_t *) (core + pos); pos += 4;
+        pos = o.image.segment[i].coff;
+        while(pos < o.image.segment[i].coff + o.image.segment[i].size) {
+            rva = * (uint32_t *) (o.image.core + pos); pos += 12;
+            dllname = (char *) o.image.core + * (uint32_t *) (o.image.core + pos); pos += 4;
+            itable = * (uint32_t *) (o.image.core + pos); pos += 4;
 
             if(rva == 0)
                 break;
 
-            if(verbose)
+            if(o.verbose)
                 printf("  dll: %s\n", dllname);
 
             import = 0;
-            while(* (uint32_t *) (core + rva + import) != 0x0) {
-                hint = * (uint16_t *) (core + rva + import);
-                symbol = * (uint32_t *) (core + rva + import) + 2;
+            while(* (uint32_t *) (o.image.core + rva + import) != 0x0) {
+                hint = * (uint16_t *) (o.image.core + rva + import);
+                symbol = * (uint32_t *) (o.image.core + rva + import) + 2;
 
                 l = label_insert(itable + import, label_IMPORT, image_seg_find(itable + import));
                 l->import.dllname = dllname;
@@ -38,15 +38,15 @@ void import_process(void) {
                     *c = '\0';
 
                 if(image_seg_find(symbol) == NULL) {
-                    if(verbose)
+                    if(o.verbose)
                         printf("    (hint %d)\n", hint);
                     l->import.hint = hint;
                     l->import.symbol = NULL;
                 } else {
-                    if(verbose)
-                        printf("    %s\n", (char *) core + symbol);
+                    if(o.verbose)
+                        printf("    %s\n", (char *) o.image.core + symbol);
                     l->import.hint = -1;
-                    l->import.symbol = (char *) core + symbol;
+                    l->import.symbol = (char *) o.image.core + symbol;
                 }
 
                 import += 4;
@@ -54,7 +54,7 @@ void import_process(void) {
                 nimport++;
             }
 
-            if(verbose)
+            if(o.verbose)
                 printf("\n");
         }
     }
