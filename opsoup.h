@@ -6,6 +6,11 @@
 #include <errno.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/mman.h>
 
 #include "nasmlib.h"
 #include "disasm.h"
@@ -32,6 +37,7 @@ typedef struct segment_st {
 } segment_t;
 
 typedef struct _image_st {
+    int              fd;
     uint8_t         *core;
     uint32_t         size;
     segment_t       *segment;

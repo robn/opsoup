@@ -1,7 +1,8 @@
 #include "opsoup.h"
 
-#define IMAGE_FILE          "gamegfx.exe"
+#define IMAGE_FILE          "ffe.o"
 
+/*
 segment_t segment[] = {
     { ".text",      seg_CODE,   0x001000,   0x016a2b,   0x000400 },
     { ".bss",       seg_BSS,    0x018000,   0x0040b4,   0        },
@@ -13,19 +14,34 @@ segment_t segment[] = {
     { ".reloc",     seg_RELOC,  0x19b000,   0x00c1c6,   0x192000 },
     { NULL,         seg_NONE,   0,          0,          0        }
 };
+*/
 
 int image_load(void) {
-    FILE *f;
+    struct stat st;
     int i;
 
-    f = fopen(IMAGE_FILE, "rb");
-    if(f == NULL) {
+    if (stat(IMAGE_FILE, &st) < 0) {
+        fprintf(stderr, "load: couldn't stat '" IMAGE_FILE "': %s\n", strerror(errno));
+        return 1;
+    }
+
+    o->image.size = st.st_size;
+
+    o->image.fd = open(IMAGE_FILE, 0, O_RDONLY);
+    if (o->image.fd < 0) {
         fprintf(stderr, "load: couldn't open '" IMAGE_FILE "' for reading: %s\n", strerror(errno));
+        return 1;
+    }
+
+    o->image.core = (uint8_t *) mmap(NULL, o->image.size, PROT_READ, MAP_SHARED, o->image.fd, 0);
+    if (o->image.core == MAP_FAILED) {
+        fprintf(stderr, "load: couldn't map '" IMAGE_FILE "': %s\n", strerror(errno));
         return 1;
     }
 
     /* !!! load segment table */
 
+#if 0
     o->image.size = 0;
     for(i = 0; segment[i].name != NULL; i++)
         if(segment[i].coff + segment[i].size > o->image.size)
@@ -59,6 +75,7 @@ int image_load(void) {
         /* calculate end offset */
         o->image.segment[i].cend = o->image.segment[i].coff + o->image.segment[i].size;
     }
+#endif
 
     return 0;
 }
