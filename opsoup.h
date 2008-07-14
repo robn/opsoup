@@ -6,8 +6,6 @@
 #include <errno.h>
 #include <stdlib.h>
 
-#include "insns.h"
-#include "nasm.h"
 #include "nasmlib.h"
 #include "disasm.h"
 #include "sync.h"
