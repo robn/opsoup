@@ -192,9 +192,9 @@ void dis_pass1(void) {
         off = segment[i].coff;
         while(off < segment[i].coff + segment[i].size) {
             /* get length of this instruction */
-            len = disasm(core + off, line, 32, off, 1, 0);
+            len = disasm(core + off, line, sizeof(line), 32, off, 1, 0);
             if(len == 0)
-                len = eatbyte(core + off, line);
+                len = eatbyte(core + off, line, sizeof(line));
 
             type = label_NONE;
 
@@ -389,9 +389,9 @@ int dis_pass2(int n) {
 
         /* disassemble from this label to the next */
         while(1) {
-            len = disasm(core + off, line, 32, off, 1, 0);
+            len = disasm(core + off, line, sizeof(line), 32, off, 1, 0);
             if(len == 0)
-                len = eatbyte(core + off, line);
+                len = eatbyte(core + off, line, sizeof(line));
 
             /* bail if we've gone past the next label */
             if(off + len > l[i].seg->cend || (i < nl - 1 && off + len > l[i + 1].target))
@@ -595,9 +595,9 @@ void dis_pass3(FILE *f) {
                     break;
 
             /* get a line */
-            len = disasm(core + off, line, 32, off, 1, 0);
+            len = disasm(core + off, line, sizeof(line), 32, off, 1, 0);
             if(len == 0)
-                len = eatbyte(core + off, line);
+                len = eatbyte(core + off, line, sizeof(line));
 
             /* bail if we've gone past the next label */
             if(off + len > label[i].seg->cend || (i < nlabel - 1 && off + len > label[i + 1].target))
