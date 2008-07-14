@@ -15,6 +15,7 @@ int main(int argc, char **argv) {
     if(image_load() != 0)
         return 1;
 
+    /*
     reloc_apply();
 
     import_process();
@@ -58,6 +59,7 @@ int main(int argc, char **argv) {
     import_stub(f);
 
     fclose(f);
+    */
 
     return 0;
 }
