@@ -3,7 +3,7 @@ NASM_PATH = /home/rob/code/asm/nasm-2.03.01
 CC = gcc
 CFLAGS = -Wall -ggdb -I$(NASM_PATH)
 
-OBJECTS = data.o disasm.o image.o import.o label.o main.o ref.o reloc.o
+OBJECTS = elf.o data.o disasm.o image.o import.o label.o main.o ref.o reloc.o
 NASM_OBJECTS = \
 	$(NASM_PATH)/insnsb.o \
 	$(NASM_PATH)/insnsn.o \

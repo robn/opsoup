@@ -157,4 +157,8 @@ void    dis_pass3(FILE *f);
 void    data_output(FILE *f);
 void    data_bss_output(FILE *f);
 
+
+/* elf stuff */
+segment_t *elf_get_segments(image_t *image);
+
 #endif

@@ -39,6 +39,8 @@ int image_load(void) {
         return 1;
     }
 
+    o->image.segment = elf_get_segments(&o->image);
+
     /* !!! load segment table */
 
 #if 0
