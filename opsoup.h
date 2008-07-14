@@ -43,7 +43,7 @@ typedef struct _opsoup_st {
     int              verbose;
 } opsoup_t;
 
-extern opsoup_t o;
+extern opsoup_t *o;
 
 
 int         image_load(void);

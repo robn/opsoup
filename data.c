@@ -30,10 +30,10 @@ void data_output(FILE *f) {
 
         /* look for strings */
         s = 0;
-        if(o.image.core[end - 1] == 0x0) {
+        if(o->image.core[end - 1] == 0x0) {
             nc = 0;
             for(j = off; j < end - 1; j++)
-                if(o.image.core[j] != 0x0 && (o.image.core[j] < 0x20 || o.image.core[j] > 0x7e))
+                if(o->image.core[j] != 0x0 && (o->image.core[j] < 0x20 || o->image.core[j] > 0x7e))
                     nc++;
 
             if((end - off) >> 4 >= nc) {
@@ -45,7 +45,7 @@ void data_output(FILE *f) {
             len = (end - off) & 0xfffffffc;
 
             while(len > 0) {
-                l = label_find(* (uint32_t *) (o.image.core + off));
+                l = label_find(* (uint32_t *) (o->image.core + off));
                 if(l != NULL) {
                     if((l->type & label_CODE_ENTRY) == label_CODE_ENTRY)
                         fprintf(f, "    dd ENTRY\n");
@@ -68,7 +68,7 @@ void data_output(FILE *f) {
                 }
 
                 if(l == NULL)
-                    fprintf(f, "    db 0x%02x, 0x%02x, 0x%02x, 0x%02x\n", o.image.core[off], o.image.core[off + 1], o.image.core[off + 2], o.image.core[off + 3]);
+                    fprintf(f, "    db 0x%02x, 0x%02x, 0x%02x, 0x%02x\n", o->image.core[off], o->image.core[off + 1], o->image.core[off + 2], o->image.core[off + 3]);
 
                 off += 4; len -= 4;
             }
@@ -83,13 +83,13 @@ void data_output(FILE *f) {
                 if(nl)
                     fprintf(f, "    db ");
 
-                if(s && o.image.core[off] >= 0x20 && o.image.core[off] <= 0x7e && o.image.core[off] != 0x27) {
+                if(s && o->image.core[off] >= 0x20 && o->image.core[off] <= 0x7e && o->image.core[off] != 0x27) {
                     if(nl)
                         fputc(0x27, f);
                     else if(!is)
                         fprintf(f, ", '");
 
-                    fputc(o.image.core[off], f);
+                    fputc(o->image.core[off], f);
 
                     nl = 0;
                     is = 1;
@@ -103,7 +103,7 @@ void data_output(FILE *f) {
                     else if(!nl)
                         fprintf(f, ", ");
 
-                    fprintf(f, "0x%02x", o.image.core[off]);
+                    fprintf(f, "0x%02x", o->image.core[off]);
 
                     nl = 0;
 
@@ -111,7 +111,7 @@ void data_output(FILE *f) {
                     if(dbc == 8)
                         nl = 1;
 
-                    if(s && (o.image.core[off] == 0xa || o.image.core[off] == 0xd) && !(off < end - 1 && o.image.core[off + 1] == (o.image.core[off] == 0xd ? 0xa : 0xd)))
+                    if(s && (o->image.core[off] == 0xa || o->image.core[off] == 0xd) && !(off < end - 1 && o->image.core[off + 1] == (o->image.core[off] == 0xd ? 0xa : 0xd)))
                         nl = 1;
                 }
 
@@ -129,7 +129,7 @@ void data_output(FILE *f) {
 
 
         /* progress report */
-        if(o.verbose)
+        if(o->verbose)
             if(i % 100 == 0)
                 printf("  processed %d labels\n", i);
     }
@@ -166,7 +166,7 @@ void data_bss_output(FILE *f) {
         fprintf(f, "    resb 0x%x\n", end - off);
 
         /* progress report */
-        if(o.verbose)
+        if(o->verbose)
             if(i % 100 == 0)
                 printf("  processed %d labels\n", i);
     }

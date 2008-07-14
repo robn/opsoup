@@ -12,15 +12,15 @@ void reloc_apply(void) {
     segment_t *s;
 
     /* process each relocation segment (can there be more than one)? */
-    for(i = 0; o.image.segment[i].name != NULL; i++) {
-        if(o.image.segment[i].type != seg_RELOC) continue;
+    for(i = 0; o->image.segment[i].name != NULL; i++) {
+        if(o->image.segment[i].type != seg_RELOC) continue;
 
-        printf("reloc: applying segment '%s'\n", o.image.segment[i].name);
+        printf("reloc: applying segment '%s'\n", o->image.segment[i].name);
 
-        pos = o.image.segment[i].coff;
-        while(pos < o.image.segment[i].cend) {
-            rva = * (uint32_t *) (o.image.core + pos); pos += 4;
-            rsize = * (uint32_t *) (o.image.core + pos); pos += 4;
+        pos = o->image.segment[i].coff;
+        while(pos < o->image.segment[i].cend) {
+            rva = * (uint32_t *) (o->image.core + pos); pos += 4;
+            rsize = * (uint32_t *) (o->image.core + pos); pos += 4;
 
             if(rsize == 0)
                 break;
@@ -29,7 +29,7 @@ void reloc_apply(void) {
 
             /* have to check each reloc, we only want HIGHLOW relocs */
             while(pos < next) {
-                off = * (uint16_t *) (o.image.core + pos); pos += 2;
+                off = * (uint16_t *) (o->image.core + pos); pos += 2;
 
                 /* HIGHLOW relocs have top 4 bits == 3 */
                 if((off >> 12) != 3)
@@ -43,11 +43,11 @@ void reloc_apply(void) {
 
                 /* apply the reloc */
                 reloc[nreloc].off = rva + (off & 0xfff);
-                * (uint32_t *) (o.image.core + reloc[nreloc].off) -= IMAGE_BASE;
-                reloc[nreloc].target = (* (uint32_t *) (o.image.core + reloc[nreloc].off));
+                * (uint32_t *) (o->image.core + reloc[nreloc].off) -= IMAGE_BASE;
+                reloc[nreloc].target = (* (uint32_t *) (o->image.core + reloc[nreloc].off));
 
                 /* !!!
-                if(o.verbose)
+                if(o->verbose)
                     printf("  reloc at 0x%x: 0x%x -> 0x%x\n", reloc[nreloc].off, reloc[nreloc].target + IMAGE_BASE, reloc[nreloc].target);
                 */
 

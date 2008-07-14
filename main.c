@@ -3,14 +3,17 @@
 #define OUTPUT_FILE         "ttdx.asm"
 #define OUTPUT_STUB         "ttdx_stub.c"
 
-opsoup_t o;
+opsoup_t *o;
 
 int main(int argc, char **argv) {
+    opsoup_t ctx;
     int round = 1;
     FILE *f;
 
+    o = &ctx;
+
     if(argc == 2 && strcmp(argv[1], "-v") == 0)
-        o.verbose = 1;
+        o->verbose = 1;
 
     if(image_load() != 0)
         return 1;

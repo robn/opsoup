@@ -7,21 +7,21 @@ int _rm_disp32(uint32_t off, uint8_t *reg) {
     uint8_t mod, rm;
 
     /* mod is the top two bits of the first byte */
-    mod = o.image.core[off] >> 6;
+    mod = o->image.core[off] >> 6;
 
     /* if mod is 3, then its a direct register access, so bail */
     if(mod == 3)
         return 0;
 
     /* rm is the bottom three bits */
-    rm = o.image.core[off] & 0x7;
+    rm = o->image.core[off] & 0x7;
 
     /* reg is the middle three bits */
     if(reg != NULL)
-        *reg = (o.image.core[off] & 0x38) >> 3;
+        *reg = (o->image.core[off] & 0x38) >> 3;
 
     /* 4-byte displacement */
-    if(mod == 2 || (mod == 0 && rm == 5) || (mod == 0 && rm == 4 && (o.image.core[off + 1] & 0x7) == 5))
+    if(mod == 2 || (mod == 0 && rm == 5) || (mod == 0 && rm == 4 && (o->image.core[off + 1] & 0x7) == 5))
         return 1;
 
     return 0;
@@ -31,12 +31,12 @@ int _rm_disp32(uint32_t off, uint8_t *reg) {
 static label_type_t _vtable_access(uint32_t off) {
     uint8_t b, reg;
 
-    b = o.image.core[off];
+    b = o->image.core[off];
 
     /* skip segment override prefixes */
     if(b == 0x26 || b == 0x2e || b == 0x36 || b == 0x3e || b == 0x64 || b == 0x65) {
         off++;
-        b = o.image.core[off];
+        b = o->image.core[off];
     }
 
     /*
@@ -59,7 +59,7 @@ static label_type_t _vtable_access(uint32_t off) {
     /*
      * movzx reg32,r/m8 == 0xf 0xb6 /r
      */
-    if(b == 0xf && o.image.core[off + 1] == 0xb6 && _rm_disp32(off + 2, NULL))
+    if(b == 0xf && o->image.core[off + 1] == 0xb6 && _rm_disp32(off + 2, NULL))
         return label_DATA;
 
     /*
@@ -76,12 +76,12 @@ static label_type_t _vtable_access(uint32_t off) {
 static int _mem_access(uint32_t off) {
     uint8_t b, reg;
 
-    b = o.image.core[off];
+    b = o->image.core[off];
 
     /* skip segment override prefixes */
     if(b == 0x26 || b == 0x2e || b == 0x36 || b == 0x3e || b == 0x64 || b == 0x65) {
         off++;
-        b = o.image.core[off];
+        b = o->image.core[off];
     }
 
     /*
@@ -115,15 +115,15 @@ static int _mem_access(uint32_t off) {
 static void _target_extract(uint32_t off, uint32_t *target, label_type_t *type) {
     uint8_t b1, b2;
 
-    b1 = o.image.core[off];
+    b1 = o->image.core[off];
 
     /* skip segment override and offset/address prefixes */
     if(b1 == 0x26 || b1 == 0x2e || b1 == 0x36 || b1 == 0x3e || b1 == 0x64 || b1 == 0x65 || b1 == 0x66 || b1 == 0x67) {
         off++;
-        b1 = o.image.core[off];
+        b1 = o->image.core[off];
     }
 
-    b2 = o.image.core[off + 1];
+    b2 = o->image.core[off + 1];
 
     /* grab bag of 8-bit relative instructions
      *   e0-e2: loop, loope, loopne
@@ -131,37 +131,37 @@ static void _target_extract(uint32_t off, uint32_t *target, label_type_t *type) 
      */
     if(b1 >= 0xe0 && b1 <= 0xe3) {
         *type = label_CODE_JUMP;
-        *target = off + 2 + * (int8_t *) (o.image.core + off + 1);
+        *target = off + 2 + * (int8_t *) (o->image.core + off + 1);
     }
 
     /* immediate-mode (offset-based) call */
     else if(b1 == 0xe8) {
         *type = label_CODE_CALL;
-        *target = off + 5 + * (int32_t *) (o.image.core + off + 1);
+        *target = off + 5 + * (int32_t *) (o->image.core + off + 1);
     }
 
     /* short (8-bit) jump */
     else if(b1 == 0xeb) {
         *type = label_CODE_JUMP;
-        *target = off + 2 + * (int8_t *) (o.image.core + off + 1);
+        *target = off + 2 + * (int8_t *) (o->image.core + off + 1);
     }
 
     /* long (32-bit) jump */
     else if(b1 == 0xe9) {
         *type = label_CODE_JUMP;
-        *target = off + 5 + * (int32_t *) (o.image.core + off + 1);
+        *target = off + 5 + * (int32_t *) (o->image.core + off + 1);
     }
 
     /* local (8-bit) conditional jump */
     else if(b1 >= 0x70 && b1 <= 0x7f) {
         *type = label_CODE_JUMP;
-        *target = off + 2 + * (int8_t *) (o.image.core + off + 1);
+        *target = off + 2 + * (int8_t *) (o->image.core + off + 1);
     }
 
     /* near (32-bit) conditional jump */
     else if(b1 == 0x0f && b2 >= 0x80 && b2 <= 0x8f) {
         *type = label_CODE_JUMP;
-        *target = off + 6 + * (int32_t *) (o.image.core + off + 2);
+        *target = off + 6 + * (int32_t *) (o->image.core + off + 2);
     }
 }
 
@@ -178,35 +178,35 @@ void dis_pass1(void) {
     label_insert(IMAGE_ENTRY, label_CODE_ENTRY, image_seg_find(IMAGE_ENTRY));
 
     /* code segments */
-    for(i = 0; o.image.segment[i].name != NULL; i++) {
-        if(o.image.segment[i].type != seg_CODE) continue;
+    for(i = 0; o->image.segment[i].name != NULL; i++) {
+        if(o->image.segment[i].type != seg_CODE) continue;
 
-        printf("dis1: processing segment '%s' (size 0x%x)\n", o.image.segment[i].name, o.image.segment[i].size);
+        printf("dis1: processing segment '%s' (size 0x%x)\n", o->image.segment[i].name, o->image.segment[i].size);
 
         /* find the first relocation in this segment */
         for(; ir < nreloc; ir++)
-            if(reloc[ir].off >= o.image.segment[i].coff)
+            if(reloc[ir].off >= o->image.segment[i].coff)
                 break;
 
         /* loop the entire segment */
-        off = o.image.segment[i].coff;
-        while(off < o.image.segment[i].coff + o.image.segment[i].size) {
+        off = o->image.segment[i].coff;
+        while(off < o->image.segment[i].coff + o->image.segment[i].size) {
             /* get length of this instruction */
-            len = disasm(o.image.core + off, line, sizeof(line), 32, off, 1, 0);
+            len = disasm(o->image.core + off, line, sizeof(line), 32, off, 1, 0);
             if(len == 0)
-                len = eatbyte(o.image.core + off, line, sizeof(line));
+                len = eatbyte(o->image.core + off, line, sizeof(line));
 
             type = label_NONE;
 
             /* this instruction in where the current relocation got applied */
-            if(ir < nreloc && off + len > reloc[ir].off && reloc[ir].off >= o.image.segment[i].coff && reloc[ir].off < o.image.segment[i].cend) {
+            if(ir < nreloc && off + len > reloc[ir].off && reloc[ir].off >= o->image.segment[i].coff && reloc[ir].off < o->image.segment[i].cend) {
                 target = reloc[ir].target;
                 ir++;
 
                 /* identifying what type of data the target points to */
                 s = image_seg_find(target);
                 if(s == NULL) {
-                    if(o.verbose)
+                    if(o->verbose)
                         printf("  target 0x%x (reloc at 0x%x) is not in a segment!\n", target, reloc[ir].off);
                     continue;
                 }
@@ -249,7 +249,7 @@ void dis_pass1(void) {
                     for(i = -5; i <= len + 5; i++) {
                         if(i == 0)
                             printf("\033[1;33m");
-                        printf(" 0x%x", o.image.core[off + i]);
+                        printf(" 0x%x", o->image.core[off + i]);
                         if(i == len)
                             printf("\033[m");
                     }
@@ -268,7 +268,7 @@ void dis_pass1(void) {
             /* add the label (as long as its in a segment) */
             s = image_seg_find(target);
             if(s == NULL) {
-                if(o.verbose)
+                if(o->verbose)
                     printf("  target 0x%x (offset 0x%x) is not in a segment!\n", target, off);
             }
 
@@ -292,7 +292,7 @@ void dis_pass1(void) {
                     type = label_NONE;
 
                     /* possible second relocation on this instruction */
-                    if(ir < nreloc && off + len > reloc[ir].off && reloc[ir].off >= o.image.segment[i].coff && reloc[ir].off < o.image.segment[i].cend) {
+                    if(ir < nreloc && off + len > reloc[ir].off && reloc[ir].off >= o->image.segment[i].coff && reloc[ir].off < o->image.segment[i].cend) {
                         target = reloc[ir].target;
                         ir++;
 
@@ -306,7 +306,7 @@ void dis_pass1(void) {
                                 type = label_DATA;
                         }
 
-                        else if(o.verbose)
+                        else if(o->verbose)
                             printf("  target 0x%x (reloc at 0x%x) is not in a segment!\n", target, reloc[ir].off);
                     }
                 }
@@ -314,7 +314,7 @@ void dis_pass1(void) {
 
             /* found a vector table, process that too */
             if(vtable != 0) {
-                if(o.verbose)
+                if(o->verbose)
                     printf("  vector table found at 0x%x\n", vtable);
 
                 voff = reloc[ir].off - 4;
@@ -350,9 +350,9 @@ void dis_pass1(void) {
             off += len;
             
             /* progress report */
-            if(o.verbose)
-                if(((off - o.image.segment[i].coff) & 0xfffff000) != ((off - o.image.segment[i].coff + len) & 0xfffff000))
-                    printf("  processed 0x%x bytes\n", off + len - o.image.segment[i].coff);
+            if(o->verbose)
+                if(((off - o->image.segment[i].coff) & 0xfffff000) != ((off - o->image.segment[i].coff + len) & 0xfffff000))
+                    printf("  processed 0x%x bytes\n", off + len - o->image.segment[i].coff);
         }
     }
 
@@ -389,9 +389,9 @@ int dis_pass2(int n) {
 
         /* disassemble from this label to the next */
         while(1) {
-            len = disasm(o.image.core + off, line, sizeof(line), 32, off, 1, 0);
+            len = disasm(o->image.core + off, line, sizeof(line), 32, off, 1, 0);
             if(len == 0)
-                len = eatbyte(o.image.core + off, line, sizeof(line));
+                len = eatbyte(o->image.core + off, line, sizeof(line));
 
             /* bail if we've gone past the next label */
             if(off + len > l[i].seg->cend || (i < nl - 1 && off + len > l[i + 1].target))
@@ -407,7 +407,7 @@ int dis_pass2(int n) {
                 /* identifying what type of data the target points to */
                 s = image_seg_find(target);
                 if(s == NULL) {
-                    if(o.verbose)
+                    if(o->verbose)
                         printf("  target 0x%x (reloc at 0x%x) is not in a segment!\n", target, reloc[ir].off);
                     continue;
                 }
@@ -450,7 +450,7 @@ int dis_pass2(int n) {
                     for(i = -5; i <= len + 5; i++) {
                         if(i == 0)
                             printf("\033[1;33m");
-                        printf(" 0x%x", o.image.core[off + i]);
+                        printf(" 0x%x", o->image.core[off + i]);
                         if(i == len)
                             printf("\033[m");
                     }
@@ -469,7 +469,7 @@ int dis_pass2(int n) {
             /* add the label (as long as its in a segment) */
             s = image_seg_find(target);
             if(s == NULL) {
-                if(o.verbose)
+                if(o->verbose)
                     printf("  target 0x%x (offset 0x%x) is not in a segment!\n", target, off);
             }
 
@@ -508,7 +508,7 @@ int dis_pass2(int n) {
                                 type = label_DATA;
                         }
 
-                        else if(o.verbose)
+                        else if(o->verbose)
                             printf("  target 0x%x (reloc at 0x%x) is not in a segment!\n", target, reloc[ir].off);
                     }
                 }
@@ -516,7 +516,7 @@ int dis_pass2(int n) {
 
             /* found a vector table, process that too */
             if(vtable != 0) {
-                if(o.verbose)
+                if(o->verbose)
                     printf("  vector table found at 0x%x\n", vtable);
 
                 voff = reloc[ir].off - 4;
@@ -554,7 +554,7 @@ int dis_pass2(int n) {
         }
 
         /* progress report */
-        if(o.verbose)
+        if(o->verbose)
             if(i % 100 == 0)
                 printf("  processed %d labels\n", i);
     }
@@ -595,9 +595,9 @@ void dis_pass3(FILE *f) {
                     break;
 
             /* get a line */
-            len = disasm(o.image.core + off, line, sizeof(line), 32, off, 1, 0);
+            len = disasm(o->image.core + off, line, sizeof(line), 32, off, 1, 0);
             if(len == 0)
-                len = eatbyte(o.image.core + off, line, sizeof(line));
+                len = eatbyte(o->image.core + off, line, sizeof(line));
 
             /* bail if we've gone past the next label */
             if(off + len > label[i].seg->cend || (i < nlabel - 1 && off + len > label[i + 1].target))
@@ -656,7 +656,7 @@ void dis_pass3(FILE *f) {
         }
 
         /* progress report */
-        if(o.verbose)
+        if(o->verbose)
             if(i % 100 == 0)
                 printf("  processed %d labels\n", i);
     }

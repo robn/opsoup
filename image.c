@@ -26,29 +26,29 @@ int image_load(void) {
 
     /* !!! load segment table */
 
-    o.image.size = 0;
+    o->image.size = 0;
     for(i = 0; segment[i].name != NULL; i++)
-        if(segment[i].coff + segment[i].size > o.image.size)
-            o.image.size = segment[i].coff + segment[i].size;
+        if(segment[i].coff + segment[i].size > o->image.size)
+            o->image.size = segment[i].coff + segment[i].size;
 
-    o.image.segment = (segment_t *) malloc(sizeof(segment_t) * i);
+    o->image.segment = (segment_t *) malloc(sizeof(segment_t) * i);
 
     for (i = 0; segment[i].name != NULL; i++)
-        o.image.segment[i] = segment[i];
+        o->image.segment[i] = segment[i];
 
-    o.image.core = (uint8_t *) malloc(o.image.size);
+    o->image.core = (uint8_t *) malloc(o->image.size);
 
-    printf("image: allocated %d bytes\n", o.image.size);
+    printf("image: allocated %d bytes\n", o->image.size);
 
-    for(i = 0; o.image.segment[i].name != NULL; i++) {
-        printf("image: loading segment '%s' to 0x%x (size 0x%x)\n", o.image.segment[i].name, o.image.segment[i].coff, o.image.segment[i].size);
+    for(i = 0; o->image.segment[i].name != NULL; i++) {
+        printf("image: loading segment '%s' to 0x%x (size 0x%x)\n", o->image.segment[i].name, o->image.segment[i].coff, o->image.segment[i].size);
 
-        if(fseek(f, o.image.segment[i].foff, SEEK_SET) < 0) {
+        if(fseek(f, o->image.segment[i].foff, SEEK_SET) < 0) {
             fprintf(stderr, "  seek error: %s\n", strerror(errno));
             return 1;
         }
 
-        if(fread(o.image.core + o.image.segment[i].coff, 1, o.image.segment[i].size, f) != o.image.segment[i].size) {
+        if(fread(o->image.core + o->image.segment[i].coff, 1, o->image.segment[i].size, f) != o->image.segment[i].size) {
             if(ferror(f))
                 fprintf(stderr, "  read error: %s\n", strerror(errno));
             else
@@ -57,7 +57,7 @@ int image_load(void) {
         }
 
         /* calculate end offset */
-        o.image.segment[i].cend = o.image.segment[i].coff + o.image.segment[i].size;
+        o->image.segment[i].cend = o->image.segment[i].coff + o->image.segment[i].size;
     }
 
     return 0;
@@ -66,9 +66,9 @@ int image_load(void) {
 segment_t *image_seg_find(uint32_t off) {
     int i;
 
-    for(i = 0; o.image.segment[i].name != NULL; i++)
-        if(off >= o.image.segment[i].coff && off < o.image.segment[i].coff + o.image.segment[i].size)
-            return &o.image.segment[i];
+    for(i = 0; o->image.segment[i].name != NULL; i++)
+        if(off >= o->image.segment[i].coff && off < o->image.segment[i].coff + o->image.segment[i].size)
+            return &o->image.segment[i];
 
     return NULL;
 }
