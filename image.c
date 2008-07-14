@@ -14,7 +14,7 @@ segment_t segment[] = {
     { NULL,         seg_NONE,   0,          0,          0        }
 };
 
-u8 *core;
+uint8_t *core;
 
 int image_load(void) {
     FILE *f;
@@ -33,7 +33,7 @@ int image_load(void) {
         if(segment[i].coff + segment[i].size > size)
             size = segment[i].coff + segment[i].size;
 
-    core = (u8 *) malloc(size);
+    core = (uint8_t *) malloc(size);
 
     printf("image: allocated %d bytes\n", size);
 
@@ -60,7 +60,7 @@ int image_load(void) {
     return 0;
 }
 
-segment_t *image_seg_find(u32 off) {
+segment_t *image_seg_find(uint32_t off) {
     int i;
 
     for(i = 0; segment[i].name != NULL; i++)

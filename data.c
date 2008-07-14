@@ -2,7 +2,7 @@
 
 void data_output(FILE *f) {
     int i, j, s, nc, is, nl, dbc, len;
-    u32 off, end;
+    uint32_t off, end;
     label_t *l;
 
     printf("data: writing data section\n");
@@ -45,7 +45,7 @@ void data_output(FILE *f) {
             len = (end - off) & 0xfffffffc;
 
             while(len > 0) {
-                l = label_find(* (u32 *) (core + off));
+                l = label_find(* (uint32_t *) (core + off));
                 if(l != NULL) {
                     if((l->type & label_CODE_ENTRY) == label_CODE_ENTRY)
                         fprintf(f, "    dd ENTRY\n");
@@ -137,7 +137,7 @@ void data_output(FILE *f) {
 
 void data_bss_output(FILE *f) {
     int i;
-    u32 off, end;
+    uint32_t off, end;
 
     printf("data: writing bss section\n");
 

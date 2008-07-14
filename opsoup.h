@@ -4,22 +4,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 #include "nasmlib.h"
 #include "disasm.h"
 #include "sync.h"
-
-
-/* unsigned types */
-typedef unsigned int    u32;
-typedef unsigned short  u16;
-typedef unsigned char   u8;
-
-/* signed types */
-typedef int             s32;
-typedef short           s16;
-typedef char            s8;
 
 
 /* set to 1 to get more logging */
@@ -42,23 +32,23 @@ typedef enum {
 typedef struct segment_st {
     char            *name;          /* segment name, for printing */
     segment_type_t  type;           /* type */
-    u32             coff;           /* core offset (ie memory location where segment starts) */
-    u32             size;           /* size (in core) */
-    u32             foff;           /* file offset (ie file location to load segment from) */
-    u32             cend;           /* end of segment (calculated by image_load()) */
+    uint32_t        coff;           /* core offset (ie memory location where segment starts) */
+    uint32_t        size;           /* size (in core) */
+    uint32_t        foff;           /* file offset (ie file location to load segment from) */
+    uint32_t        cend;           /* end of segment (calculated by image_load()) */
 } segment_t;
 
-extern u8           *core;
+extern uint8_t      *core;
 extern segment_t    segment[];
 
 int         image_load(void);
-segment_t   *image_seg_find(u32 off);
+segment_t   *image_seg_find(uint32_t off);
 
 /* relocations */
 
 typedef struct reloc_st {
-    u32             off;            /* memory location of the relocation */
-    u32             target;         /* where the relocated address points to (ie a label target) */
+    uint32_t        off;            /* memory location of the relocation */
+    uint32_t        target;         /* where the relocated address points to (ie a label target) */
 } reloc_t;
 
 extern reloc_t  *reloc;
@@ -100,7 +90,7 @@ typedef struct import_st {
 
 /* label data */
 typedef struct label_st {
-    u32             target;         /* where this label is located */
+    uint32_t        target;         /* where this label is located */
     label_type_t    type;           /* its type */
     segment_t       *seg;           /* segment the label is in, for convenience */
 
@@ -112,9 +102,9 @@ typedef struct label_st {
 extern label_t  *label;
 extern int      nlabel;
 
-label_t         *label_find(u32 target);
-label_t         *label_insert(u32 target, label_type_t type, segment_t *s);
-void            label_remove(u32 target);
+label_t         *label_find(uint32_t target);
+label_t         *label_insert(uint32_t target, label_type_t type, segment_t *s);
+void            label_remove(uint32_t target);
 void            label_ref_check(void);
 void            label_reloc_upgrade(void);
 int             label_print_count(char *str);
@@ -128,15 +118,15 @@ void            label_number(void);
 
 /* reference data */
 typedef struct ref_st {
-    u32             off;                    /* location of the reference (eg instruction that uses the label */
-    u32             target[MAX_REF_TARGET]; /* location of target labels (one instruction can use more than one label) */    
+    uint32_t        off;                    /* location of the reference (eg instruction that uses the label */
+    uint32_t        target[MAX_REF_TARGET]; /* location of target labels (one instruction can use more than one label) */    
     int             ntarget;                /* number of targets */
 } ref_t;
 
 extern ref_t    *ref;
 extern int      nref;
 
-ref_t           *ref_insert(u32 source, u32 target);
+ref_t           *ref_insert(uint32_t source, uint32_t target);
 
 
 /* imports */

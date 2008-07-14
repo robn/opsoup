@@ -4,7 +4,7 @@ ref_t *ref = NULL;
 int nref = 0, sref = 0;
 
 /* find a ref, return its index */
-static int _ref_find_ll(u32 off) {
+static int _ref_find_ll(uint32_t off) {
     ref_t *rf = ref;
     int nrf = nref, abs = 0, i = 1;
 
@@ -35,7 +35,7 @@ static int _ref_find_ll(u32 off) {
 }
 
 /* add a ref to the array */
-ref_t *ref_insert(u32 off, u32 target) {
+ref_t *ref_insert(uint32_t off, uint32_t target) {
     int i, ti;
 
     i = _ref_find_ll(off);

@@ -7,8 +7,8 @@ int nreloc = 0, sreloc = 0;
 
 void reloc_apply(void) {
     int i;
-    u32 pos, next, rva, rsize;
-    u16 off;
+    uint32_t pos, next, rva, rsize;
+    uint16_t off;
     segment_t *s;
 
     /* process each relocation segment (can there be more than one)? */
@@ -19,8 +19,8 @@ void reloc_apply(void) {
 
         pos = segment[i].coff;
         while(pos < segment[i].cend) {
-            rva = * (u32 *) (core + pos); pos += 4;
-            rsize = * (u32 *) (core + pos); pos += 4;
+            rva = * (uint32_t *) (core + pos); pos += 4;
+            rsize = * (uint32_t *) (core + pos); pos += 4;
 
             if(rsize == 0)
                 break;
@@ -29,7 +29,7 @@ void reloc_apply(void) {
 
             /* have to check each reloc, we only want HIGHLOW relocs */
             while(pos < next) {
-                off = * (u16 *) (core + pos); pos += 2;
+                off = * (uint16_t *) (core + pos); pos += 2;
 
                 /* HIGHLOW relocs have top 4 bits == 3 */
                 if((off >> 12) != 3)
@@ -43,8 +43,8 @@ void reloc_apply(void) {
 
                 /* apply the reloc */
                 reloc[nreloc].off = rva + (off & 0xfff);
-                * (u32 *) (core + reloc[nreloc].off) -= IMAGE_BASE;
-                reloc[nreloc].target = (* (u32 *) (core + reloc[nreloc].off));
+                * (uint32_t *) (core + reloc[nreloc].off) -= IMAGE_BASE;
+                reloc[nreloc].target = (* (uint32_t *) (core + reloc[nreloc].off));
 
                 /* !!!
                 if(verbose)

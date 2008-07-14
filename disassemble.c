@@ -3,8 +3,8 @@
 #define IMAGE_ENTRY         (0x11783)
 
 /* see if this r/m operand has a 32-bit displacement */
-int _rm_disp32(u32 off, u8 *reg) {
-    u8 mod, rm;
+int _rm_disp32(uint32_t off, uint8_t *reg) {
+    uint8_t mod, rm;
 
     /* mod is the top two bits of the first byte */
     mod = core[off] >> 6;
@@ -28,8 +28,8 @@ int _rm_disp32(u32 off, u8 *reg) {
 }
 
 /* see if the current instruction has a memory access through a vector table */
-static label_type_t _vtable_access(u32 off) {
-    u8 b, reg;
+static label_type_t _vtable_access(uint32_t off) {
+    uint8_t b, reg;
 
     b = core[off];
 
@@ -73,8 +73,8 @@ static label_type_t _vtable_access(u32 off) {
 }
 
 /* see if the current instruction has a memory access */
-static int _mem_access(u32 off) {
-    u8 b, reg;
+static int _mem_access(uint32_t off) {
+    uint8_t b, reg;
 
     b = core[off];
 
@@ -112,8 +112,8 @@ static int _mem_access(u32 off) {
     return 0;
 }
 
-static void _target_extract(u32 off, u32 *target, label_type_t *type) {
-    u8 b1, b2;
+static void _target_extract(uint32_t off, uint32_t *target, label_type_t *type) {
+    uint8_t b1, b2;
 
     b1 = core[off];
 
@@ -131,43 +131,43 @@ static void _target_extract(u32 off, u32 *target, label_type_t *type) {
      */
     if(b1 >= 0xe0 && b1 <= 0xe3) {
         *type = label_CODE_JUMP;
-        *target = off + 2 + * (s8 *) (core + off + 1);
+        *target = off + 2 + * (int8_t *) (core + off + 1);
     }
 
     /* immediate-mode (offset-based) call */
     else if(b1 == 0xe8) {
         *type = label_CODE_CALL;
-        *target = off + 5 + * (s32 *) (core + off + 1);
+        *target = off + 5 + * (int32_t *) (core + off + 1);
     }
 
     /* short (8-bit) jump */
     else if(b1 == 0xeb) {
         *type = label_CODE_JUMP;
-        *target = off + 2 + * (s8 *) (core + off + 1);
+        *target = off + 2 + * (int8_t *) (core + off + 1);
     }
 
     /* long (32-bit) jump */
     else if(b1 == 0xe9) {
         *type = label_CODE_JUMP;
-        *target = off + 5 + * (s32 *) (core + off + 1);
+        *target = off + 5 + * (int32_t *) (core + off + 1);
     }
 
     /* local (8-bit) conditional jump */
     else if(b1 >= 0x70 && b1 <= 0x7f) {
         *type = label_CODE_JUMP;
-        *target = off + 2 + * (s8 *) (core + off + 1);
+        *target = off + 2 + * (int8_t *) (core + off + 1);
     }
 
     /* near (32-bit) conditional jump */
     else if(b1 == 0x0f && b2 >= 0x80 && b2 <= 0x8f) {
         *type = label_CODE_JUMP;
-        *target = off + 6 + * (s32 *) (core + off + 2);
+        *target = off + 6 + * (int32_t *) (core + off + 2);
     }
 }
 
 void dis_pass1(void) {
     int i, len, ir = 0;
-    u32 off, target, vtable = 0, voff;
+    uint32_t off, target, vtable = 0, voff;
     label_type_t type, vtype;
     char line[256];
     segment_t *s;
@@ -362,7 +362,7 @@ void dis_pass1(void) {
 int dis_pass2(int n) {
     label_t *l;
     int nl, i, ir = 0, len;
-    u32 off, target, vtable = 0, voff;
+    uint32_t off, target, vtable = 0, voff;
     char line[256];
     label_type_t type, vtype;
     segment_t *s;
@@ -566,7 +566,7 @@ int dis_pass2(int n) {
 
 void dis_pass3(FILE *f) {
     int i, j = 0, len, ti;
-    u32 off;
+    uint32_t off;
     char line[256], line2[256], *pos, *num, *rest;
     label_t *l;
 

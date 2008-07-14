@@ -2,9 +2,9 @@
 
 void import_process(void) {
     int i, nimport = 0;
-    u32 pos, rva, itable, import, symbol;
+    uint32_t pos, rva, itable, import, symbol;
     char *dllname, *c;
-    u16 hint;
+    uint16_t hint;
     label_t *l;
 
     /* process each import segment (can there be more than one)? */
@@ -15,9 +15,9 @@ void import_process(void) {
 
         pos = segment[i].coff;
         while(pos < segment[i].coff + segment[i].size) {
-            rva = * (u32 *) (core + pos); pos += 12;
-            dllname = (char *) core + * (u32 *) (core + pos); pos += 4;
-            itable = * (u32 *) (core + pos); pos += 4;
+            rva = * (uint32_t *) (core + pos); pos += 12;
+            dllname = (char *) core + * (uint32_t *) (core + pos); pos += 4;
+            itable = * (uint32_t *) (core + pos); pos += 4;
 
             if(rva == 0)
                 break;
@@ -26,9 +26,9 @@ void import_process(void) {
                 printf("  dll: %s\n", dllname);
 
             import = 0;
-            while(* (u32 *) (core + rva + import) != 0x0) {
-                hint = * (u16 *) (core + rva + import);
-                symbol = * (u32 *) (core + rva + import) + 2;
+            while(* (uint32_t *) (core + rva + import) != 0x0) {
+                hint = * (uint16_t *) (core + rva + import);
+                symbol = * (uint32_t *) (core + rva + import) + 2;
 
                 l = label_insert(itable + import, label_IMPORT, image_seg_find(itable + import));
                 l->import.dllname = dllname;
