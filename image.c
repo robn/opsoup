@@ -33,7 +33,7 @@ int image_load(void) {
         return 1;
     }
 
-    o->image.core = (uint8_t *) mmap(NULL, o->image.size, PROT_READ, MAP_SHARED, o->image.fd, 0);
+    o->image.core = (uint8_t *) mmap(NULL, o->image.size, PROT_READ | PROT_WRITE, MAP_PRIVATE, o->image.fd, 0);
     if (o->image.core == MAP_FAILED) {
         fprintf(stderr, "load: couldn't map '" IMAGE_FILE "': %s\n", strerror(errno));
         return 1;
