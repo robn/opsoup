@@ -7,6 +7,7 @@ segment_t *elf_get_segments(image_t *image) {
     Elf32_Shdr *sh;
     char *strings;
     int i;
+    segment_type_t type;
 
     eh = (Elf32_Ehdr *) image->core;
 
@@ -42,7 +43,32 @@ segment_t *elf_get_segments(image_t *image) {
     for (i = 0; i < eh->e_shnum; i++) {
         sh = (Elf32_Shdr *) (image->core + eh->e_shoff + i * eh->e_shentsize);
 
-        printf("elf: %d: %s\n", i, strings + sh->sh_name);
+        type = seg_NONE;
+
+        switch (sh->sh_type) {
+            case SHT_PROGBITS:
+                if (!(sh->sh_flags & SHF_ALLOC))
+                    continue;
+
+                if (sh->sh_flags & SHF_EXECINSTR)
+                    type = seg_CODE;
+                else
+                    type = seg_DATA;
+                break;
+
+            case SHT_NOBITS:
+                type = seg_BSS;
+                break;
+
+            case SHT_REL:
+                type = seg_RELOC;
+                break;
+
+            default:
+                continue;
+        }
+
+        printf("elf: segment '%s' is type seg_%s\n", strings + sh->sh_name, type == seg_CODE ? "CODE" : type == seg_DATA ? "DATA" : type == seg_BSS ? "BSS" : "RELOC");
     }
 
     return NULL;
