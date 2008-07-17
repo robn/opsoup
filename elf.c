@@ -3,11 +3,13 @@
 #include <linux/elf.h>
 
 segment_t *elf_get_segments(image_t *image) {
+    segment_t *segment = NULL;
+    int nsegs = 0, cur = 0;
+    segment_type_t type;
     Elf32_Ehdr *eh;
     Elf32_Shdr *sh;
     char *strings;
     int i;
-    segment_type_t type;
 
     eh = (Elf32_Ehdr *) image->core;
 
@@ -38,8 +40,6 @@ segment_t *elf_get_segments(image_t *image) {
     sh = (Elf32_Shdr *) (image->core + eh->e_shoff + eh->e_shstrndx * eh->e_shentsize);
     strings = (char *) (image->core + sh->sh_offset);
 
-    printf("elf: %d sections\n", eh->e_shnum);
-
     for (i = 0; i < eh->e_shnum; i++) {
         sh = (Elf32_Shdr *) (image->core + eh->e_shoff + i * eh->e_shentsize);
 
@@ -68,8 +68,30 @@ segment_t *elf_get_segments(image_t *image) {
                 continue;
         }
 
-        printf("elf: segment '%s' is type seg_%s\n", strings + sh->sh_name, type == seg_CODE ? "CODE" : type == seg_DATA ? "DATA" : type == seg_BSS ? "BSS" : "RELOC");
+        if (cur == nsegs) {
+            nsegs += 8;
+            segment = realloc(segment, sizeof(segment_t) * nsegs);
+        }
+
+        segment[cur].name = strings + sh->sh_name;
+        segment[cur].type = type;
+        segment[cur].start = sh->sh_offset;
+        segment[cur].size = sh->sh_size;
+        segment[cur].end = segment[cur].start + segment[cur].size;
+        segment[cur].info = (void *) sh;
+
+        printf("elf: segment '%s' is type seg_%s, start 0x%x, size 0x%x\n", segment[cur].name, type == seg_CODE ? "CODE" : type == seg_DATA ? "DATA" : type == seg_BSS ? "BSS" : "RELOC", segment[cur].start, segment[cur].size);
+
+        cur++;
     }
 
-    return NULL;
+    if (cur == nsegs) {
+        nsegs += 1;
+        segment = realloc(segment, sizeof(segment_t) * nsegs);
+    }
+
+    segment[cur].name = NULL;
+    segment[cur].type = seg_NONE;
+
+    return segment;
 }
