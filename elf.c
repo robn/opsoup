@@ -98,7 +98,7 @@ int elf_make_segment_table(image_t *image) {
     return 0;
 }
 
-int elf_relocate(image_t *image) {
+int elf_relocate(opsoup_t *o) {
     int i, j;
     segment_t *reloc_segment, *target_segment;
     Elf32_Shdr *sh;
@@ -107,24 +107,24 @@ int elf_relocate(image_t *image) {
     uint32_t *mem;
     intptr_t val;
 
-    for (i = 0; image->segment[i].name != NULL; i++) {
-        if (image->segment[i].type != seg_RELOC)
+    for (i = 0; o->image.segment[i].name != NULL; i++) {
+        if (o->image.segment[i].type != seg_RELOC)
             continue;
 
-        reloc_segment = &image->segment[i];
+        reloc_segment = &o->image.segment[i];
         sh = reloc_segment->info;
 
-        rel = (Elf32_Rel *) (image->core + sh->sh_offset);
+        rel = (Elf32_Rel *) (o->image.core + sh->sh_offset);
         nrel = sh->sh_size / sh->sh_entsize;
 
-        target_segment = &image->segment[sh->sh_info];
+        target_segment = &o->image.segment[sh->sh_info];
         sh = target_segment->info;
 
         printf("elf: applying %d relocations from reloc segment '%s' to target segment '%s'\n", nrel, reloc_segment->name, target_segment->name);
 
         for (j = 0; j < nrel; j++) {
-            mem = (uint32_t *) (image->core + rel->r_offset);
-            val = (intptr_t) (image->core + sh->sh_offset);
+            mem = (uint32_t *) (o->image.core + rel->r_offset);
+            val = (intptr_t) (o->image.core + sh->sh_offset);
 
             switch (ELF32_R_TYPE(rel->r_info)) {
                 case R_386_32:
@@ -139,6 +139,8 @@ int elf_relocate(image_t *image) {
                     fprintf(stderr, "elf: unknown relocation type %d\n", ELF32_R_TYPE(rel->r_info));
                     return -1;
             }
+
+
         }
     }
 

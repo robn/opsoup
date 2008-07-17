@@ -156,6 +156,6 @@ void    data_bss_output(FILE *f);
 
 /* elf stuff */
 int elf_make_segment_table(image_t *image);
-int elf_relocate(image_t *image);
+int elf_relocate(opsoup_t *o);
 
 #endif
