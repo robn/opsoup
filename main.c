@@ -11,6 +11,7 @@ int main(int argc, char **argv) {
     FILE *f;
 
     o = &ctx;
+    memset(o, 0, sizeof (opsoup_t));
 
     if(argc == 2 && strcmp(argv[1], "-v") == 0)
         o->verbose = 1;
