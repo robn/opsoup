@@ -78,7 +78,7 @@ int elf_make_segment_table(image_t *image) {
         segment[cur].start = sh->sh_offset;
         segment[cur].size = sh->sh_size;
         segment[cur].end = segment[cur].start + segment[cur].size;
-        segment[cur].info = (void *) sh;
+        segment[cur].info = sh;
 
         printf("elf: segment '%s' is type seg_%s, start 0x%x, size 0x%x\n", segment[cur].name, type == seg_CODE ? "CODE" : type == seg_DATA ? "DATA" : type == seg_BSS ? "BSS" : "RELOC", segment[cur].start, segment[cur].size);
 
