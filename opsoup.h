@@ -28,12 +28,12 @@ typedef enum {
 
 /* segment data */
 typedef struct segment_st {
-    char            *name;          /* segment name, for printing */
-    segment_type_t   type;          /* type */
-    uint32_t         coff;          /* core offset (ie memory location where segment starts) */
-    uint32_t         size;          /* size (in core) */
-    uint32_t         foff;          /* file offset (ie file location to load segment from) */
-    uint32_t         cend;          /* end of segment (calculated by image_load()) */
+    char            *name;
+    segment_type_t   type;
+    uint32_t         start;
+    uint32_t         end;
+    uint32_t         size;
+    void            *info;
 } segment_t;
 
 typedef struct _image_st {

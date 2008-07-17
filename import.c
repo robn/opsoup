@@ -13,8 +13,8 @@ void import_process(void) {
 
         printf("import: processing segment '%s'\n", o->image.segment[i].name);
 
-        pos = o->image.segment[i].coff;
-        while(pos < o->image.segment[i].coff + o->image.segment[i].size) {
+        pos = o->image.segment[i].start;
+        while(pos < o->image.segment[i].start + o->image.segment[i].size) {
             rva = * (uint32_t *) (o->image.core + pos); pos += 12;
             dllname = (char *) o->image.core + * (uint32_t *) (o->image.core + pos); pos += 4;
             itable = * (uint32_t *) (o->image.core + pos); pos += 4;

@@ -24,7 +24,7 @@ void data_output(FILE *f) {
 
         /* where is the next label (or end of segment)? */
         if(i == nlabel - 1 || label[i].seg != label[i + 1].seg)
-            end = label[i].seg->coff + label[i].seg->size;
+            end = label[i].seg->start + label[i].seg->size;
         else
             end = label[i + 1].target;
 
@@ -158,7 +158,7 @@ void data_bss_output(FILE *f) {
 
         /* where is the next label (or end of segment)? */
         if(i == nlabel - 1 || label[i].seg != label[i + 1].seg)
-            end = label[i].seg->coff + label[i].seg->size;
+            end = label[i].seg->start + label[i].seg->size;
         else
             end = label[i + 1].target;
 

@@ -185,12 +185,12 @@ void dis_pass1(void) {
 
         /* find the first relocation in this segment */
         for(; ir < nreloc; ir++)
-            if(reloc[ir].off >= o->image.segment[i].coff)
+            if(reloc[ir].off >= o->image.segment[i].start)
                 break;
 
         /* loop the entire segment */
-        off = o->image.segment[i].coff;
-        while(off < o->image.segment[i].coff + o->image.segment[i].size) {
+        off = o->image.segment[i].start;
+        while(off < o->image.segment[i].start + o->image.segment[i].size) {
             /* get length of this instruction */
             len = disasm(o->image.core + off, line, sizeof(line), 32, off, 1, 0);
             if(len == 0)
@@ -199,7 +199,7 @@ void dis_pass1(void) {
             type = label_NONE;
 
             /* this instruction in where the current relocation got applied */
-            if(ir < nreloc && off + len > reloc[ir].off && reloc[ir].off >= o->image.segment[i].coff && reloc[ir].off < o->image.segment[i].cend) {
+            if(ir < nreloc && off + len > reloc[ir].off && reloc[ir].off >= o->image.segment[i].start && reloc[ir].off < o->image.segment[i].end) {
                 target = reloc[ir].target;
                 ir++;
 
@@ -292,7 +292,7 @@ void dis_pass1(void) {
                     type = label_NONE;
 
                     /* possible second relocation on this instruction */
-                    if(ir < nreloc && off + len > reloc[ir].off && reloc[ir].off >= o->image.segment[i].coff && reloc[ir].off < o->image.segment[i].cend) {
+                    if(ir < nreloc && off + len > reloc[ir].off && reloc[ir].off >= o->image.segment[i].start && reloc[ir].off < o->image.segment[i].end) {
                         target = reloc[ir].target;
                         ir++;
 
@@ -351,8 +351,8 @@ void dis_pass1(void) {
             
             /* progress report */
             if(o->verbose)
-                if(((off - o->image.segment[i].coff) & 0xfffff000) != ((off - o->image.segment[i].coff + len) & 0xfffff000))
-                    printf("  processed 0x%x bytes\n", off + len - o->image.segment[i].coff);
+                if(((off - o->image.segment[i].start) & 0xfffff000) != ((off - o->image.segment[i].start + len) & 0xfffff000))
+                    printf("  processed 0x%x bytes\n", off + len - o->image.segment[i].start);
         }
     }
 
@@ -394,13 +394,13 @@ int dis_pass2(int n) {
                 len = eatbyte(o->image.core + off, line, sizeof(line));
 
             /* bail if we've gone past the next label */
-            if(off + len > l[i].seg->cend || (i < nl - 1 && off + len > l[i + 1].target))
+            if(off + len > l[i].seg->end || (i < nl - 1 && off + len > l[i + 1].target))
                 break;
 
             type = label_NONE;
 
             /* this instruction in where the current relocation got applied */
-            if(ir < nreloc && off + len > reloc[ir].off && reloc[ir].off >= l[i].seg->coff && reloc[ir].off < l[i].seg->cend) {
+            if(ir < nreloc && off + len > reloc[ir].off && reloc[ir].off >= l[i].seg->start && reloc[ir].off < l[i].seg->end) {
                 target = reloc[ir].target;
                 ir++;
 
@@ -494,7 +494,7 @@ int dis_pass2(int n) {
                     type = label_NONE;
 
                     /* possible second relocation on this instruction */
-                    if(ir < nreloc && off + len > reloc[ir].off && reloc[ir].off >= l[i].seg->coff && reloc[ir].off < l[i].seg->cend) {
+                    if(ir < nreloc && off + len > reloc[ir].off && reloc[ir].off >= l[i].seg->start && reloc[ir].off < l[i].seg->end) {
                         target = reloc[ir].target;
                         ir++;
 
@@ -600,7 +600,7 @@ void dis_pass3(FILE *f) {
                 len = eatbyte(o->image.core + off, line, sizeof(line));
 
             /* bail if we've gone past the next label */
-            if(off + len > label[i].seg->cend || (i < nlabel - 1 && off + len > label[i + 1].target))
+            if(off + len > label[i].seg->end || (i < nlabel - 1 && off + len > label[i + 1].target))
                 break;
 
             /* turn memory-location-looking arguments into labels */

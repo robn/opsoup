@@ -17,8 +17,8 @@ void reloc_apply(void) {
 
         printf("reloc: applying segment '%s'\n", o->image.segment[i].name);
 
-        pos = o->image.segment[i].coff;
-        while(pos < o->image.segment[i].cend) {
+        pos = o->image.segment[i].start;
+        while(pos < o->image.segment[i].end) {
             rva = * (uint32_t *) (o->image.core + pos); pos += 4;
             rsize = * (uint32_t *) (o->image.core + pos); pos += 4;
 
