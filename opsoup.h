@@ -43,8 +43,16 @@ typedef struct _image_st {
     segment_t       *segment;
 } image_t;
 
+typedef struct _reloc_st {
+    uint32_t         off;
+    uint32_t         target;
+} reloc_t;
+
 typedef struct _opsoup_st {
     image_t          image;
+
+    reloc_t         *reloc;
+    int              nreloc;
 
     int              verbose;
 } opsoup_t;
@@ -55,18 +63,6 @@ extern opsoup_t *o;
 int         image_load(void);
 segment_t   *image_seg_find(uint32_t off);
 
-
-/* relocations */
-
-typedef struct reloc_st {
-    uint32_t        off;            /* memory location of the relocation */
-    uint32_t        target;         /* where the relocated address points to (ie a label target) */
-} reloc_t;
-
-extern reloc_t  *reloc;
-extern int      nreloc;
-
-void            reloc_apply(void);
 
 
 /* labels */

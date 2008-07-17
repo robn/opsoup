@@ -184,8 +184,8 @@ void dis_pass1(void) {
         printf("dis1: processing segment '%s' (size 0x%x)\n", o->image.segment[i].name, o->image.segment[i].size);
 
         /* find the first relocation in this segment */
-        for(; ir < nreloc; ir++)
-            if(reloc[ir].off >= o->image.segment[i].start)
+        for(; ir < o->nreloc; ir++)
+            if(o->reloc[ir].off >= o->image.segment[i].start)
                 break;
 
         /* loop the entire segment */
@@ -199,15 +199,15 @@ void dis_pass1(void) {
             type = label_NONE;
 
             /* this instruction in where the current relocation got applied */
-            if(ir < nreloc && off + len > reloc[ir].off && reloc[ir].off >= o->image.segment[i].start && reloc[ir].off < o->image.segment[i].end) {
-                target = reloc[ir].target;
+            if(ir < o->nreloc && off + len > o->reloc[ir].off && o->reloc[ir].off >= o->image.segment[i].start && o->reloc[ir].off < o->image.segment[i].end) {
+                target = o->reloc[ir].target;
                 ir++;
 
                 /* identifying what type of data the target points to */
                 s = image_seg_find(target);
                 if(s == NULL) {
                     if(o->verbose)
-                        printf("  target 0x%x (reloc at 0x%x) is not in a segment!\n", target, reloc[ir].off);
+                        printf("  target 0x%x (reloc at 0x%x) is not in a segment!\n", target, o->reloc[ir].off);
                     continue;
                 }
 
@@ -240,7 +240,7 @@ void dis_pass1(void) {
 
                 /*
                 else {
-                    printf("\n           reloc: 0x%x\n", reloc[ir].off);
+                    printf("\n           reloc: 0x%x\n", o->reloc[ir].off);
                     printf("          offset: 0x%x\n", off);
                     printf("          target: 0x%x (%s)\n", target, s->name);
                     printf("     instruction: %s\n", line);
@@ -292,8 +292,8 @@ void dis_pass1(void) {
                     type = label_NONE;
 
                     /* possible second relocation on this instruction */
-                    if(ir < nreloc && off + len > reloc[ir].off && reloc[ir].off >= o->image.segment[i].start && reloc[ir].off < o->image.segment[i].end) {
-                        target = reloc[ir].target;
+                    if(ir < o->nreloc && off + len > o->reloc[ir].off && o->reloc[ir].off >= o->image.segment[i].start && o->reloc[ir].off < o->image.segment[i].end) {
+                        target = o->reloc[ir].target;
                         ir++;
 
                         /* its a straight data access */
@@ -307,7 +307,7 @@ void dis_pass1(void) {
                         }
 
                         else if(o->verbose)
-                            printf("  target 0x%x (reloc at 0x%x) is not in a segment!\n", target, reloc[ir].off);
+                            printf("  target 0x%x (reloc at 0x%x) is not in a segment!\n", target, o->reloc[ir].off);
                     }
                 }
             }
@@ -317,11 +317,11 @@ void dis_pass1(void) {
                 if(o->verbose)
                     printf("  vector table found at 0x%x\n", vtable);
 
-                voff = reloc[ir].off - 4;
+                voff = o->reloc[ir].off - 4;
 
                 /* keep going as long as relocations happen every dword */
-                while(reloc[ir].off == voff + 4) {
-                    s = image_seg_find(reloc[ir].target);
+                while(o->reloc[ir].off == voff + 4) {
+                    s = image_seg_find(o->reloc[ir].target);
 
                     if(s == NULL || s->type == seg_BSS)
                         type = label_BSS;
@@ -333,9 +333,9 @@ void dis_pass1(void) {
                         type = vtype;
 
                     /* add the label */
-                    label_insert(reloc[ir].target, type, s);
+                    label_insert(o->reloc[ir].target, type, s);
 
-                    ref_insert(reloc[ir].off, reloc[ir].target);
+                    ref_insert(o->reloc[ir].off, o->reloc[ir].target);
 
                     /* next reloc, next vector */
                     ir++;
@@ -383,8 +383,8 @@ int dis_pass2(int n) {
         off = l[i].target;
 
         /* skip relocs forward to this label */
-        for(; ir < nreloc; ir++)
-            if(reloc[ir].off >= off)
+        for(; ir < o->nreloc; ir++)
+            if(o->reloc[ir].off >= off)
                 break;
 
         /* disassemble from this label to the next */
@@ -400,15 +400,15 @@ int dis_pass2(int n) {
             type = label_NONE;
 
             /* this instruction in where the current relocation got applied */
-            if(ir < nreloc && off + len > reloc[ir].off && reloc[ir].off >= l[i].seg->start && reloc[ir].off < l[i].seg->end) {
-                target = reloc[ir].target;
+            if(ir < o->nreloc && off + len > o->reloc[ir].off && o->reloc[ir].off >= l[i].seg->start && o->reloc[ir].off < l[i].seg->end) {
+                target = o->reloc[ir].target;
                 ir++;
 
                 /* identifying what type of data the target points to */
                 s = image_seg_find(target);
                 if(s == NULL) {
                     if(o->verbose)
-                        printf("  target 0x%x (reloc at 0x%x) is not in a segment!\n", target, reloc[ir].off);
+                        printf("  target 0x%x (reloc at 0x%x) is not in a segment!\n", target, o->reloc[ir].off);
                     continue;
                 }
 
@@ -441,7 +441,7 @@ int dis_pass2(int n) {
 
                 /*
                 else {
-                    printf("\n           reloc: 0x%x\n", reloc[ir].off);
+                    printf("\n           reloc: 0x%x\n", o->reloc[ir].off);
                     printf("          offset: 0x%x\n", off);
                     printf("          target: 0x%x (%s)\n", target, s->name);
                     printf("     instruction: %s\n", line);
@@ -494,8 +494,8 @@ int dis_pass2(int n) {
                     type = label_NONE;
 
                     /* possible second relocation on this instruction */
-                    if(ir < nreloc && off + len > reloc[ir].off && reloc[ir].off >= l[i].seg->start && reloc[ir].off < l[i].seg->end) {
-                        target = reloc[ir].target;
+                    if(ir < o->nreloc && off + len > o->reloc[ir].off && o->reloc[ir].off >= l[i].seg->start && o->reloc[ir].off < l[i].seg->end) {
+                        target = o->reloc[ir].target;
                         ir++;
 
                         /* its a straight data access */
@@ -509,7 +509,7 @@ int dis_pass2(int n) {
                         }
 
                         else if(o->verbose)
-                            printf("  target 0x%x (reloc at 0x%x) is not in a segment!\n", target, reloc[ir].off);
+                            printf("  target 0x%x (reloc at 0x%x) is not in a segment!\n", target, o->reloc[ir].off);
                     }
                 }
             }
@@ -519,11 +519,11 @@ int dis_pass2(int n) {
                 if(o->verbose)
                     printf("  vector table found at 0x%x\n", vtable);
 
-                voff = reloc[ir].off - 4;
+                voff = o->reloc[ir].off - 4;
 
                 /* keep going as long as relocations happen every dword */
-                while(reloc[ir].off == voff + 4) {
-                    s = image_seg_find(reloc[ir].target);
+                while(o->reloc[ir].off == voff + 4) {
+                    s = image_seg_find(o->reloc[ir].target);
 
                     if(s == NULL || s->type == seg_BSS)
                         type = label_BSS;
@@ -535,10 +535,10 @@ int dis_pass2(int n) {
                         type = vtype;
 
                     /* add the label */
-                    label_insert(reloc[ir].target, type, s);
+                    label_insert(o->reloc[ir].target, type, s);
 
                     /* and a reference to it */
-                    ref_insert(reloc[ir].off, reloc[ir].target);
+                    ref_insert(o->reloc[ir].off, o->reloc[ir].target);
 
                     /* next reloc, next vector */
                     ir++;
