@@ -99,13 +99,27 @@ int elf_make_segment_table(image_t *image) {
 }
 
 int elf_relocate(image_t *image) {
-    int i;
+    int i, j;
+    segment_t *reloc_segment, *target_segment;
+    Elf32_Shdr *sh;
+    int nrel;
+    Elf32_Rel *rel;
 
-    for (i = 0; o->image.segment[i].name != NULL; i++) {
-        if (o->image.segment[i].type != seg_RELOC)
+    for (i = 0; image->segment[i].name != NULL; i++) {
+        if (image->segment[i].type != seg_RELOC)
             continue;
 
-        printf("elf: applying relocation segment '%s'\n", o->image.segment[i].name);
+        reloc_segment = &image->segment[i];
+        sh = reloc_segment->info;
+
+        target_segment = &image->segment[sh->sh_info];
+
+        nrel = sh->sh_size / sh->sh_entsize;
+
+        printf("elf: applying %d relocations from reloc segment '%s' to target segment '%s'\n", nrel, reloc_segment->name, target_segment->name);
+
+        rel = (Elf32_Rel *) (image->core + sh->sh_offset);
+        sh = target_segment->info;
     }
 
     return 0;
