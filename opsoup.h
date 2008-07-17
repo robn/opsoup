@@ -159,6 +159,6 @@ void    data_bss_output(FILE *f);
 
 
 /* elf stuff */
-segment_t *elf_get_segments(image_t *image);
+int elf_make_segment_table(image_t *image);
 
 #endif

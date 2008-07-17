@@ -39,8 +39,7 @@ int image_load(void) {
         return 1;
     }
 
-    o->image.segment = elf_get_segments(&o->image);
-    if (o->image.segment == NULL) {
+    if (elf_make_segment_table(&o->image) < 0) {
         fprintf(stderr, "load: no segments found\n");
         return 1;
     }
