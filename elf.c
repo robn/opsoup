@@ -1,6 +1,6 @@
 #include "opsoup.h"
 
-#include <linux/elf.h>
+#include <elf.h>
 
 int elf_make_segment_table(image_t *image) {
     segment_t *segment = NULL;
@@ -104,6 +104,8 @@ int elf_relocate(image_t *image) {
     Elf32_Shdr *sh;
     int nrel;
     Elf32_Rel *rel;
+    uint32_t *mem;
+    intptr_t val;
 
     for (i = 0; image->segment[i].name != NULL; i++) {
         if (image->segment[i].type != seg_RELOC)
@@ -112,14 +114,32 @@ int elf_relocate(image_t *image) {
         reloc_segment = &image->segment[i];
         sh = reloc_segment->info;
 
-        target_segment = &image->segment[sh->sh_info];
-
+        rel = (Elf32_Rel *) (image->core + sh->sh_offset);
         nrel = sh->sh_size / sh->sh_entsize;
+
+        target_segment = &image->segment[sh->sh_info];
+        sh = target_segment->info;
 
         printf("elf: applying %d relocations from reloc segment '%s' to target segment '%s'\n", nrel, reloc_segment->name, target_segment->name);
 
-        rel = (Elf32_Rel *) (image->core + sh->sh_offset);
-        sh = target_segment->info;
+        for (j = 0; j < nrel; j++) {
+            mem = (uint32_t *) (image->core + rel->r_offset);
+            val = (intptr_t) (image->core + sh->sh_offset);
+
+            switch (ELF32_R_TYPE(rel->r_info)) {
+                case R_386_32:
+                    *mem += val;
+                    break;
+
+                case R_386_PC32:
+                    *mem += val - (intptr_t) mem;
+                    break;
+
+                default:
+                    fprintf(stderr, "elf: unknown relocation type %d\n", ELF32_R_TYPE(rel->r_info));
+                    return -1;
+            }
+        }
     }
 
     return 0;
