@@ -99,5 +99,14 @@ int elf_make_segment_table(image_t *image) {
 }
 
 int elf_relocate(image_t *image) {
+    int i;
+
+    for (i = 0; o->image.segment[i].name != NULL; i++) {
+        if (o->image.segment[i].type != seg_RELOC)
+            continue;
+
+        printf("elf: applying relocation segment '%s'\n", o->image.segment[i].name);
+    }
+
     return 0;
 }
