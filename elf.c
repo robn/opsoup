@@ -48,7 +48,7 @@ int elf_make_segment_table(image_t *image) {
         switch (sh->sh_type) {
             case SHT_PROGBITS:
                 if (!(sh->sh_flags & SHF_ALLOC))
-                    continue;
+                    break;
 
                 if (sh->sh_flags & SHF_EXECINSTR)
                     type = seg_CODE;
@@ -65,7 +65,7 @@ int elf_make_segment_table(image_t *image) {
                 break;
 
             default:
-                continue;
+                break;
         }
 
         if (cur == nsegs) {
@@ -80,7 +80,7 @@ int elf_make_segment_table(image_t *image) {
         segment[cur].end = segment[cur].start + segment[cur].size;
         segment[cur].info = sh;
 
-        printf("elf: segment '%s' is type seg_%s, start 0x%x, size 0x%x\n", segment[cur].name, type == seg_CODE ? "CODE" : type == seg_DATA ? "DATA" : type == seg_BSS ? "BSS" : "RELOC", segment[cur].start, segment[cur].size);
+        printf("elf: segment '%s' is type seg_%s, start 0x%x, size 0x%x\n", segment[cur].name, type == seg_CODE ? "CODE" : type == seg_DATA ? "DATA" : type == seg_BSS ? "BSS" : type == seg_RELOC ? "RELOC" : "NONE", segment[cur].start, segment[cur].size);
 
         cur++;
     }
