@@ -97,3 +97,7 @@ int elf_make_segment_table(image_t *image) {
 
     return 0;
 }
+
+int elf_relocate(image_t *image) {
+    return 0;
+}

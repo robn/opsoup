@@ -44,6 +44,11 @@ int image_load(void) {
         return 1;
     }
 
+    if (elf_relocate(&o->image) < 0) {
+        fprintf(stderr, "load: relocation failed\n");
+        return 1;
+    }
+
     /* !!! load segment table */
 
 #if 0
