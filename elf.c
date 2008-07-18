@@ -106,6 +106,13 @@ int elf_relocate(opsoup_t *o) {
     Elf32_Rel *rel;
     uint32_t *mem;
     intptr_t val;
+    int sreloc = 0;
+
+    if (o->reloc != NULL) {
+        free(o->reloc);
+        o->reloc = NULL;
+        o->nreloc = 0;
+    }
 
     for (i = 0; o->image.segment[i].name != NULL; i++) {
         if (o->image.segment[i].type != seg_RELOC)
@@ -140,7 +147,15 @@ int elf_relocate(opsoup_t *o) {
                     return -1;
             }
 
+            if (o->nreloc == sreloc) {
+                sreloc += 1024;
+                o->reloc = (reloc_t *) realloc(o->reloc, sizeof (reloc_t) * sreloc);
+            }
 
+            o->reloc[o->nreloc].off = rel->r_offset;
+            o->reloc[o->nreloc].target = *mem;
+
+            label_insert(o->reloc[o->nreloc].target, label_RELOC, target_segment);
         }
     }
 
