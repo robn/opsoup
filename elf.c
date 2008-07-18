@@ -157,6 +157,8 @@ int elf_relocate(opsoup_t *o) {
 
             label_insert(o->reloc[o->nreloc].target, label_RELOC, target_segment);
         }
+
+        label_print_count("reloc");
     }
 
     return 0;
