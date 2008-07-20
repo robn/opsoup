@@ -19,6 +19,10 @@ int main(int argc, char **argv) {
     if(image_load() != 0)
         return 1;
 
+    init_sync();
+
+    dis_pass1();
+
     /*
     reloc_apply();
 
