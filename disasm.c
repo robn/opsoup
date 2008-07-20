@@ -182,7 +182,7 @@ void dis_pass1(void) {
         for(; ir < o->nreloc; ir++)
             if(o->reloc[ir].off >= o->image.segment[i].start)
                 break;
-
+                
         /* loop the entire segment */
         off = o->image.segment[i].start;
         while(off < o->image.segment[i].start + o->image.segment[i].size) {

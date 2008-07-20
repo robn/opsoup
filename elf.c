@@ -101,7 +101,8 @@ int elf_make_segment_table(image_t *image) {
 int elf_relocate(opsoup_t *o) {
     int i, j;
     segment_t *reloc_segment, *target_segment;
-    Elf32_Shdr *sh;
+    Elf32_Shdr *sh, *shsymtab;
+    Elf32_Sym *symtab;
     int nrel;
     Elf32_Rel *rel;
     uint32_t *mem;
@@ -124,14 +125,24 @@ int elf_relocate(opsoup_t *o) {
         rel = (Elf32_Rel *) (o->image.core + sh->sh_offset);
         nrel = sh->sh_size / sh->sh_entsize;
 
+        shsymtab = o->image.segment[sh->sh_link].info;
+        symtab = (Elf32_Sym *) (o->image.core + shsymtab->sh_offset);
+
         target_segment = &o->image.segment[sh->sh_info];
         sh = target_segment->info;
 
         printf("elf: applying %d relocations from reloc segment '%s' to target segment '%s'\n", nrel, reloc_segment->name, target_segment->name);
 
-        for (j = 0; j < nrel; j++) {
-            mem = (uint32_t *) (o->image.core + rel->r_offset);
-            val = (intptr_t) (o->image.core + sh->sh_offset);
+        for (j = 0; j < nrel; j++, rel++) {
+            Elf32_Sym *sym;
+            
+            mem = (uint32_t *) (o->image.core + sh->sh_offset + rel->r_offset);
+
+            sym = &symtab[ELF32_R_SYM(rel->r_info)];
+            val = (intptr_t) ((Elf32_Shdr *) (o->image.segment[i].info))->sh_offset + sym->st_value;
+
+            if (o->verbose)
+                printf("  applying symbol '%s' at 0x%08x, value 0x%08x\n", o->image.core + ((Elf32_Shdr *) (o->image.segment[((Elf32_Shdr *) (reloc_segment->info))->sh_link].info))->sh_offset + sym->st_shndx, (unsigned int) mem, val);
 
             switch (ELF32_R_TYPE(rel->r_info)) {
                 case R_386_32:
@@ -156,6 +167,8 @@ int elf_relocate(opsoup_t *o) {
             o->reloc[o->nreloc].target = *mem;
 
             label_insert(o->reloc[o->nreloc].target, label_RELOC, target_segment);
+
+            o->nreloc++;
         }
 
         label_print_count("reloc");
