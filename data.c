@@ -47,9 +47,7 @@ void data_output(FILE *f) {
             while(len > 0) {
                 l = label_find(* (uint32_t *) (o->image.core + off));
                 if(l != NULL) {
-                    if((l->type & label_CODE_ENTRY) == label_CODE_ENTRY)
-                        fprintf(f, "    dd ENTRY\n");
-                    else if((l->type & label_CODE_CALL) == label_CODE_CALL)
+                    if((l->type & label_CODE_CALL) == label_CODE_CALL)
                         fprintf(f, "    dd CALL_%06d\n", l->num);
                     else if((l->type & label_CODE_JUMP) == label_CODE_JUMP)
                         fprintf(f, "    dd JUMP_%06d\n", l->num);

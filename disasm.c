@@ -1,7 +1,5 @@
 #include "opsoup.h"
 
-#define IMAGE_ENTRY         (0x11783)
-
 /* see if this r/m operand has a 32-bit displacement */
 int _rm_disp32(uint32_t off, uint8_t *reg) {
     uint8_t mod, rm;
@@ -173,9 +171,6 @@ void dis_pass1(void) {
     segment_t *s;
 
     printf("dis1: disassembly, pass 1 - finding obvious labels\n");
-
-    /* force the entry point */
-    label_insert(IMAGE_ENTRY, label_CODE_ENTRY, image_seg_find(IMAGE_ENTRY));
 
     /* code segments */
     for(i = 0; o->image.segment[i].name != NULL; i++) {
@@ -579,9 +574,7 @@ void dis_pass3(FILE *f) {
         if(!(label[i].type & label_CODE)) continue;
 
         /* output the label */
-        if((label[i].type & label_CODE_ENTRY) == label_CODE_ENTRY)
-            fprintf(f, "\n\nENTRY:                      ; off = %x\n\n", label[i].target);
-        else if((label[i].type & label_CODE_CALL) == label_CODE_CALL)
+        if((label[i].type & label_CODE_CALL) == label_CODE_CALL)
             fprintf(f, "\n\nCALL_%06d:                  ; off = %x\n\n", label[i].num, label[i].target);
         else if((label[i].type & label_CODE_JUMP) == label_CODE_JUMP)
             fprintf(f, "\n\nJUMP_%06d:                  ; off = %x\n\n", label[i].num, label[i].target);
@@ -623,9 +616,7 @@ void dis_pass3(FILE *f) {
 
                 *num = '\0';
 
-                if((l->type & label_CODE_ENTRY) == label_CODE_ENTRY)
-                    sprintf(line2, "%sENTRY", line);
-                else if((l->type & label_CODE_CALL) == label_CODE_CALL)
+                if((l->type & label_CODE_CALL) == label_CODE_CALL)
                     sprintf(line2, "%sCALL_%06d", line, l->num);
                 else if((l->type & label_CODE_JUMP) == label_CODE_JUMP)
                     sprintf(line2, "%sJUMP_%06d", line, l->num);

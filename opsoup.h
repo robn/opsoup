@@ -84,7 +84,6 @@ typedef enum {
     label_CODE          = 0x80,     /* code item */
     label_CODE_JUMP     = 0x82,     /* jump point ("jmp" instruction target) */
     label_CODE_CALL     = 0x84,     /* call point ("call" instruction target) */
-    label_CODE_ENTRY    = 0x88,     /* entry point */
 
     label_IMPORT        = 0x100     /* vector to imported function */
 } label_type_t;

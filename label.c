@@ -109,7 +109,7 @@ void label_ref_check(void) {
     i = 0;
     while(i < nlabel) {
         //if(label[i].type & label_CODE && label[i].num == 0 && label[i].type != label_CODE_ENTRY) {
-        if(label[i].num == 0 && label[i].type != label_CODE_ENTRY) {
+        if(label[i].num == 0) {
             if(i < nlabel - 1)
                 memmove(&(label[i]), &(label[i + 1]), sizeof(label_t) * (nlabel - i + 1));
             nlabel--;
