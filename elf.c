@@ -139,7 +139,7 @@ int elf_relocate(opsoup_t *o) {
             mem = (uint32_t *) (o->image.core + sh->sh_offset + rel->r_offset);
 
             sym = &symtab[ELF32_R_SYM(rel->r_info)];
-            val = (intptr_t) o->image.core + ((Elf32_Shdr *) (o->image.segment[i].info))->sh_offset + sym->st_value;
+            val = (intptr_t) o->image.core + ((Elf32_Shdr *) (o->image.segment[sym->st_shndx].info))->sh_offset + sym->st_value;
 
             /*
             if (o->verbose)
