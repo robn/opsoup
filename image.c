@@ -18,7 +18,6 @@ segment_t segment[] = {
 
 int image_load(void) {
     struct stat st;
-    int i;
 
     if (stat(IMAGE_FILE, &st) < 0) {
         fprintf(stderr, "load: couldn't stat '" IMAGE_FILE "': %s\n", strerror(errno));

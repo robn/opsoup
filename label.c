@@ -100,7 +100,7 @@ void label_remove(uint8_t *target) {
 
 void label_ref_check(void) {
     int i, j;
-    segment_t *s;
+    // segment_t *s;
 
     for(i = 0; i < nref; i++)
         for(j = 0; j < ref[i].ntarget; j++)
