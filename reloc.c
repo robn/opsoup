@@ -1,7 +1,5 @@
 #include "opsoup.h"
 
-#define IMAGE_BASE          (0x400000)
-
 reloc_t *reloc = NULL;
 int nreloc = 0, sreloc = 0;
 

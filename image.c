@@ -1,20 +1,6 @@
 #include "opsoup.h"
 
-#define IMAGE_FILE          "ffe.o"
-
-/*
-segment_t segment[] = {
-    { ".text",      seg_CODE,   0x001000,   0x016a2b,   0x000400 },
-    { ".bss",       seg_BSS,    0x018000,   0x0040b4,   0        },
-    { ".rdata",     seg_DATA,   0x01d000,   0x0000ca,   0x017000 },
-    { ".data",      seg_DATA,   0x01e000,   0x004080,   0x017200 },
-    { ".idata",     seg_IMPORT, 0x023000,   0x000ee8,   0x01b400 },
-    { "DATASEG",    seg_DATA,   0x024000,   0x113e13,   0x01c400 },
-    { "CODESEG",    seg_CODE,   0x138000,   0x05f45d,   0x130400 },
-    { ".reloc",     seg_RELOC,  0x19b000,   0x00c1c6,   0x192000 },
-    { NULL,         seg_NONE,   0,          0,          0        }
-};
-*/
+#define IMAGE_FILE "ffe.o"
 
 int image_load(void) {
     struct stat st;
