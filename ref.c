@@ -4,7 +4,7 @@ ref_t *ref = NULL;
 int nref = 0, sref = 0;
 
 /* find a ref, return its index */
-static int _ref_find_ll(uint32_t off) {
+static int _ref_find_ll(uint8_t *mem) {
     ref_t *rf = ref;
     int nrf = nref, abs = 0, i = 1;
 
@@ -16,11 +16,11 @@ static int _ref_find_ll(uint32_t off) {
         i = nrf >> 1;
         
         /* found it, return */
-        if(rf[i].off == off)
+        if(rf[i].mem == mem)
             return abs + i;
 
         /* search the bottom half */
-        if(rf[i].off > off)
+        if(rf[i].mem > mem)
             nrf = i;
 
         /* search the top half */
@@ -35,14 +35,14 @@ static int _ref_find_ll(uint32_t off) {
 }
 
 /* add a ref to the array */
-ref_t *ref_insert(uint32_t off, uint32_t target) {
+ref_t *ref_insert(uint8_t *mem, uint8_t *target) {
     int i, ti;
 
-    i = _ref_find_ll(off);
+    i = _ref_find_ll(mem);
     if(i < 0) {
         /* not found, search forward for the insertion point */
         i = -i - 1;
-        for(; i < nref && ref[i].off < off; i++);
+        for(; i < nref && ref[i].mem < mem; i++);
 
         /* make space if necessary */
         if(nref == sref) {
@@ -56,7 +56,7 @@ ref_t *ref_insert(uint32_t off, uint32_t target) {
         nref++;
 
         /* fill it out */
-        ref[i].off = off;
+        ref[i].mem = mem;
         ref[i].ntarget = 0;
     }
 
@@ -68,7 +68,7 @@ ref_t *ref_insert(uint32_t off, uint32_t target) {
     /* fail if we can't add any more targets */
     if(ref[i].ntarget == MAX_REF_TARGET) {
         if(o->verbose)
-            printf("  more than %d targets for label ref 0x%x\n", MAX_REF_TARGET, off);
+            printf("  more than %d targets for label ref %p\n", MAX_REF_TARGET, mem);
         return &(ref[i]);
     }
 

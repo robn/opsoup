@@ -5,7 +5,7 @@ int nlabel = 0, slabel = 0;
 int added = 0, upgraded = 0;
 
 /* find a label, return its index */
-static int _label_find_ll(uint32_t target) {
+static int _label_find_ll(uint8_t *target) {
     label_t *l = label;
     int nl = nlabel, abs = 0, i = 1;
 
@@ -36,7 +36,7 @@ static int _label_find_ll(uint32_t target) {
 }
 
 /* find a label and return it */
-label_t *label_find(uint32_t target) {
+label_t *label_find(uint8_t *target) {
     int i;
 
     i = _label_find_ll(target);
@@ -47,7 +47,7 @@ label_t *label_find(uint32_t target) {
 }
 
 /* add a label to the array */
-label_t *label_insert(uint32_t target, label_type_t type, segment_t *s) {
+label_t *label_insert(uint8_t *target, label_type_t type, segment_t *s) {
     int i;
 
     i = _label_find_ll(target);
@@ -77,7 +77,7 @@ label_t *label_insert(uint32_t target, label_type_t type, segment_t *s) {
 
     else if((type & ~0xf) > (label[i].type & ~0xf)) {
         if(o->verbose)
-            printf("  upgrading 0x%x from %02x to %02x\n", target, label[i].type, type);
+            printf("  upgrading %p from %02x to %02x\n", target, label[i].type, type);
         label[i].type = type;
         upgraded++;
     }
@@ -86,7 +86,7 @@ label_t *label_insert(uint32_t target, label_type_t type, segment_t *s) {
 }
 
 /* drop a label */
-void label_remove(uint32_t target) {
+void label_remove(uint8_t *target) {
     int i;
 
     i = _label_find_ll(target);
@@ -138,7 +138,7 @@ void label_reloc_upgrade(void) {
     for(i = 0; i < nlabel; i++) {
         if(!(label[i].type & label_RELOC)) continue;
         if(o->verbose)
-            printf("  upgrading 0x%x from %02x to %02x\n", label[i].target, label[i].type, label_DATA);
+            printf("  upgrading %p from %02x to %02x\n", label[i].target, label[i].type, label_DATA);
         label[i].type = label_DATA;
         upgraded++;
     }

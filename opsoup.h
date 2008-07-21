@@ -30,8 +30,8 @@ typedef enum {
 typedef struct segment_st {
     char            *name;
     segment_type_t   type;
-    uint32_t         start;
-    uint32_t         end;
+    uint8_t         *start;
+    uint8_t         *end;
     uint32_t         size;
     void            *info;
 } segment_t;
@@ -44,8 +44,8 @@ typedef struct _image_st {
 } image_t;
 
 typedef struct _reloc_st {
-    uint32_t         off;
-    uint32_t         target;
+    uint8_t         *mem;
+    uint8_t         *target;
 } reloc_t;
 
 typedef struct _opsoup_st {
@@ -61,7 +61,7 @@ extern opsoup_t *o;
 
 
 int         image_load(void);
-segment_t   *image_seg_find(uint32_t off);
+segment_t   *image_seg_find(uint8_t *mem);
 
 
 
@@ -97,7 +97,7 @@ typedef struct import_st {
 
 /* label data */
 typedef struct label_st {
-    uint32_t        target;         /* where this label is located */
+    uint8_t         *target;         /* where this label is located */
     label_type_t    type;           /* its type */
     segment_t       *seg;           /* segment the label is in, for convenience */
 
@@ -109,9 +109,9 @@ typedef struct label_st {
 extern label_t  *label;
 extern int      nlabel;
 
-label_t         *label_find(uint32_t target);
-label_t         *label_insert(uint32_t target, label_type_t type, segment_t *s);
-void            label_remove(uint32_t target);
+label_t         *label_find(uint8_t *target);
+label_t         *label_insert(uint8_t *target, label_type_t type, segment_t *s);
+void            label_remove(uint8_t *target);
 void            label_ref_check(void);
 void            label_reloc_upgrade(void);
 int             label_print_count(char *str);
@@ -125,15 +125,15 @@ void            label_number(void);
 
 /* reference data */
 typedef struct ref_st {
-    uint32_t        off;                    /* location of the reference (eg instruction that uses the label */
-    uint32_t        target[MAX_REF_TARGET]; /* location of target labels (one instruction can use more than one label) */    
+    uint8_t       *mem;                    /* location of the reference (eg instruction that uses the label */
+    uint8_t       *target[MAX_REF_TARGET]; /* location of target labels (one instruction can use more than one label) */    
     int             ntarget;                /* number of targets */
 } ref_t;
 
 extern ref_t    *ref;
 extern int      nref;
 
-ref_t           *ref_insert(uint32_t source, uint32_t target);
+ref_t           *ref_insert(uint8_t *source, uint8_t *target);
 
 
 /* imports */

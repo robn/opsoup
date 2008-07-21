@@ -1,8 +1,8 @@
 #include "opsoup.h"
 
 void data_output(FILE *f) {
-    int i, j, s, nc, is, nl, dbc, len;
-    uint32_t off, end;
+    int i, s, nc, is, nl, dbc, len;
+    uint8_t *mem, *end, *p;
     label_t *l;
 
     printf("data: writing data section\n");
@@ -18,34 +18,34 @@ void data_output(FILE *f) {
             fprintf(f, "\n; vector table\n");
         else
             fprintf(f, "\n");
-        fprintf(f, "DATA_%06d:                  ; off = %x\n", label[i].num, label[i].target);
+        fprintf(f, "DATA_%06d:                  ; off = %x\n", label[i].num, (uint32_t) (label[i].target - label[i].seg->start));
 
-        off = label[i].target;
+        mem = label[i].target;
 
         /* where is the next label (or end of segment)? */
         if(i == nlabel - 1 || label[i].seg != label[i + 1].seg)
-            end = label[i].seg->start + label[i].seg->size;
+            end = label[i].seg->end;
         else
             end = label[i + 1].target;
 
         /* look for strings */
         s = 0;
-        if(o->image.core[end - 1] == 0x0) {
+        if(end[-1] == 0x0) {
             nc = 0;
-            for(j = off; j < end - 1; j++)
-                if(o->image.core[j] != 0x0 && (o->image.core[j] < 0x20 || o->image.core[j] > 0x7e))
+            for(p = mem; p < end-1; p++)
+                if(*p != 0x0 && (*p < 0x20 || *p > 0x7e))
                     nc++;
 
-            if((end - off) >> 4 >= nc) {
+            if((end - mem) >> 4 >= nc) {
                 s = 1;
             }
         }
 
         if(label[i].type & label_VTABLE) {
-            len = (end - off) & 0xfffffffc;
+            len = (end - mem) & 0xfffffffc;
 
             while(len > 0) {
-                l = label_find(* (uint32_t *) (o->image.core + off));
+                l = label_find((uint8_t *) * (uint32_t *) mem);
                 if(l != NULL) {
                     if((l->type & label_CODE_CALL) == label_CODE_CALL)
                         fprintf(f, "    dd CALL_%06d\n", l->num);
@@ -66,9 +66,9 @@ void data_output(FILE *f) {
                 }
 
                 if(l == NULL)
-                    fprintf(f, "    db 0x%02x, 0x%02x, 0x%02x, 0x%02x\n", o->image.core[off], o->image.core[off + 1], o->image.core[off + 2], o->image.core[off + 3]);
+                    fprintf(f, "    db 0x%02x, 0x%02x, 0x%02x, 0x%02x\n", mem[0], mem[1], mem[2], mem[3]);
 
-                off += 4; len -= 4;
+                mem += 4; len -= 4;
             }
         }
 
@@ -77,17 +77,17 @@ void data_output(FILE *f) {
             nl = 1;
             is = 0;
 
-            while(off < end) {
+            while(mem < end) {
                 if(nl)
                     fprintf(f, "    db ");
 
-                if(s && o->image.core[off] >= 0x20 && o->image.core[off] <= 0x7e && o->image.core[off] != 0x27) {
+                if(s && *mem >= 0x20 && *mem <= 0x7e && *mem != 0x27) {
                     if(nl)
                         fputc(0x27, f);
                     else if(!is)
                         fprintf(f, ", '");
 
-                    fputc(o->image.core[off], f);
+                    fputc(*mem, f);
 
                     nl = 0;
                     is = 1;
@@ -101,7 +101,7 @@ void data_output(FILE *f) {
                     else if(!nl)
                         fprintf(f, ", ");
 
-                    fprintf(f, "0x%02x", o->image.core[off]);
+                    fprintf(f, "0x%02x", *mem);
 
                     nl = 0;
 
@@ -109,11 +109,11 @@ void data_output(FILE *f) {
                     if(dbc == 8)
                         nl = 1;
 
-                    if(s && (o->image.core[off] == 0xa || o->image.core[off] == 0xd) && !(off < end - 1 && o->image.core[off + 1] == (o->image.core[off] == 0xd ? 0xa : 0xd)))
+                    if(s && (*mem == 0xa || *mem == 0xd) && !(mem < end-1 && mem[1] == (*mem == 0xd ? 0xa : 0xd)))
                         nl = 1;
                 }
 
-                if(nl || off == end - 1) {
+                if(nl || mem == end-1) {
                     if(is)
                         fputc(0x27, f);
                     fputc('\n', f);
@@ -121,7 +121,7 @@ void data_output(FILE *f) {
                     is = 0;
                 }
 
-                off++;
+                mem++;
             }
         }
 
@@ -135,7 +135,7 @@ void data_output(FILE *f) {
 
 void data_bss_output(FILE *f) {
     int i;
-    uint32_t off, end;
+    uint8_t *mem, *end;
 
     printf("data: writing bss section\n");
 
@@ -150,9 +150,9 @@ void data_bss_output(FILE *f) {
             fprintf(f, "\n; vector table\n");
         else
             fprintf(f, "\n");
-        fprintf(f, "BSS_%06d:                   ; off = %x\n", label[i].num, label[i].target);
+        fprintf(f, "BSS_%06d:                   ; off = %x\n", label[i].num, (uint32_t) (label[i].target - label[i].seg->start));
 
-        off = label[i].target;
+        mem = label[i].target;
 
         /* where is the next label (or end of segment)? */
         if(i == nlabel - 1 || label[i].seg != label[i + 1].seg)
@@ -161,7 +161,7 @@ void data_bss_output(FILE *f) {
             end = label[i + 1].target;
 
         /* easy */
-        fprintf(f, "    resb 0x%x\n", end - off);
+        fprintf(f, "    resb 0x%x\n", end - mem);
 
         /* progress report */
         if(o->verbose)

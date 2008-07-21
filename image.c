@@ -90,11 +90,11 @@ int image_load(void) {
     return 0;
 }
 
-segment_t *image_seg_find(uint32_t off) {
+segment_t *image_seg_find(uint8_t *mem) {
     int i;
 
     for(i = 0; o->image.segment[i].name != NULL; i++)
-        if(off >= o->image.segment[i].start && off < o->image.segment[i].start + o->image.segment[i].size)
+        if(mem >= o->image.segment[i].start && mem < o->image.segment[i].start + o->image.segment[i].size)
             return &o->image.segment[i];
 
     return NULL;

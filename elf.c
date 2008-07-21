@@ -75,12 +75,12 @@ int elf_make_segment_table(image_t *image) {
 
         segment[cur].name = strings + sh->sh_name;
         segment[cur].type = type;
-        segment[cur].start = sh->sh_offset;
+        segment[cur].start = o->image.core + sh->sh_offset;
         segment[cur].size = sh->sh_size;
         segment[cur].end = segment[cur].start + segment[cur].size;
         segment[cur].info = sh;
 
-        printf("elf: segment '%s' is type seg_%s, start 0x%x, size 0x%x\n", segment[cur].name, type == seg_CODE ? "CODE" : type == seg_DATA ? "DATA" : type == seg_BSS ? "BSS" : type == seg_RELOC ? "RELOC" : "NONE", segment[cur].start, segment[cur].size);
+        printf("elf: segment '%s' is type seg_%s, start %p, size 0x%x\n", segment[cur].name, type == seg_CODE ? "CODE" : type == seg_DATA ? "DATA" : type == seg_BSS ? "BSS" : type == seg_RELOC ? "RELOC" : "NONE", segment[cur].start, segment[cur].size);
 
         cur++;
     }
@@ -165,8 +165,8 @@ int elf_relocate(opsoup_t *o) {
                 o->reloc = (reloc_t *) realloc(o->reloc, sizeof (reloc_t) * sreloc);
             }
 
-            o->reloc[o->nreloc].off = (uint32_t) mem;
-            o->reloc[o->nreloc].target = *mem;
+            o->reloc[o->nreloc].mem = (uint8_t *) mem;
+            o->reloc[o->nreloc].target = (uint8_t *) *mem;
 
             /*
             if (o->verbose)
