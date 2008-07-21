@@ -36,6 +36,7 @@ int main(int argc, char **argv) {
         nref = 0;
         round++;
     }
+    */
 
     label_reloc_upgrade();
 
@@ -43,6 +44,7 @@ int main(int argc, char **argv) {
 
     label_number();
 
+    /*
     f = fopen(OUTPUT_FILE, "w");
     if(f == NULL) {
         printf("main: couldn't open '" OUTPUT_FILE "' for writing: %s\n", strerror(errno));
