@@ -139,10 +139,12 @@ int elf_relocate(opsoup_t *o) {
             mem = (uint32_t *) (o->image.core + sh->sh_offset + rel->r_offset);
 
             sym = &symtab[ELF32_R_SYM(rel->r_info)];
-            val = (intptr_t) ((Elf32_Shdr *) (o->image.segment[i].info))->sh_offset + sym->st_value;
+            val = (intptr_t) o->image.core + ((Elf32_Shdr *) (o->image.segment[i].info))->sh_offset + sym->st_value;
 
+            /*
             if (o->verbose)
                 printf("  applying symbol '%s' at 0x%08x, value 0x%08x\n", o->image.core + ((Elf32_Shdr *) (o->image.segment[((Elf32_Shdr *) (reloc_segment->info))->sh_link].info))->sh_offset + sym->st_shndx, (unsigned int) mem, val);
+            */
 
             switch (ELF32_R_TYPE(rel->r_info)) {
                 case R_386_32:
@@ -163,8 +165,13 @@ int elf_relocate(opsoup_t *o) {
                 o->reloc = (reloc_t *) realloc(o->reloc, sizeof (reloc_t) * sreloc);
             }
 
-            o->reloc[o->nreloc].off = rel->r_offset;
+            o->reloc[o->nreloc].off = (uint32_t) mem;
             o->reloc[o->nreloc].target = *mem;
+
+            /*
+            if (o->verbose)
+                printf("  added reloc offset 0x%x target 0x%x\n", o->reloc[o->nreloc].off, o->reloc[o->nreloc].target);
+            */
 
             label_insert(o->reloc[o->nreloc].target, label_RELOC, target_segment);
 
