@@ -209,6 +209,7 @@ void dis_pass1(void) {
                 if(s == NULL) {
                     if(o->verbose)
                         printf("  target %p (reloc at %p) is not in a segment!\n", target, o->reloc[ir].mem);
+                    mem += len;
                     continue;
                 }
 
@@ -420,6 +421,7 @@ int dis_pass2(int n) {
                 if(s == NULL) {
                     if(o->verbose)
                         printf("  target %p (reloc at %p) is not in a segment!\n", target, o->reloc[ir].mem);
+                    mem += len;
                     continue;
                 }
 
