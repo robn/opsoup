@@ -196,6 +196,9 @@ void dis_pass1(void) {
             if(len == 0)
                 len = eatbyte(mem, line, sizeof(line));
 
+            if (o->verbose)
+                printf("  %s\n", line);
+
             /* this instruction in where the current relocation got applied */
             if(ir < o->nreloc && mem + len > o->reloc[ir].mem &&
                o->reloc[ir].mem >= o->image.segment[i].start &&
@@ -208,7 +211,7 @@ void dis_pass1(void) {
                 s = image_seg_find(target);
                 if(s == NULL) {
                     if(o->verbose)
-                        printf("  target %p (reloc at %p) is not in a segment!\n", target, o->reloc[ir].mem);
+                        printf("    target %p (reloc at %p) is not in a segment!\n", target, o->reloc[ir].mem);
                     mem += len;
                     continue;
                 }
@@ -269,7 +272,7 @@ void dis_pass1(void) {
 
             if (target == NULL) {
                 if (o->verbose)
-                    printf("  '%s' has no target\n", line);
+                    printf("    no target\n");
                 mem += len;
                 continue;
             }
@@ -278,7 +281,7 @@ void dis_pass1(void) {
             s = image_seg_find(target);
             if(s == NULL) {
                 if(o->verbose)
-                    printf("  target %p (mem %p) is not in a segment!\n", target, mem);
+                    printf("    target %p (mem %p) is not in a segment!\n", target, mem);
             }
 
             else {
@@ -319,7 +322,7 @@ void dis_pass1(void) {
                         }
 
                         else if(o->verbose)
-                            printf("  target %p (reloc at %p) is not in a segment!\n", target, o->reloc[ir].mem);
+                            printf("    target %p (reloc at %p) is not in a segment!\n", target, o->reloc[ir].mem);
                     }
                 }
             }
@@ -327,7 +330,7 @@ void dis_pass1(void) {
             /* found a vector table, process that too */
             if(vtable != NULL) {
                 if(o->verbose)
-                    printf("  vector table found at %p\n", vtable);
+                    printf("    vector table found at %p\n", vtable);
 
                 vmem = o->reloc[ir].mem - 4;
 
@@ -405,6 +408,9 @@ int dis_pass2(int n) {
             if(len == 0)
                 len = eatbyte(mem, line, sizeof(line));
 
+            if (o->verbose)
+                printf("  %s\n", line);
+
             /* bail if we've gone past the next label */
             if(mem + len > l[i].seg->end || (i < nl - 1 && mem + len > l[i + 1].target))
                 break;
@@ -420,7 +426,7 @@ int dis_pass2(int n) {
                 s = image_seg_find(target);
                 if(s == NULL) {
                     if(o->verbose)
-                        printf("  target %p (reloc at %p) is not in a segment!\n", target, o->reloc[ir].mem);
+                        printf("    target %p (reloc at %p) is not in a segment!\n", target, o->reloc[ir].mem);
                     mem += len;
                     continue;
                 }
@@ -481,7 +487,7 @@ int dis_pass2(int n) {
 
             if (target == NULL) {
                 if (o->verbose)
-                    printf("  '%s' has no target\n", line);
+                    printf("    no target\n");
                 mem += len;
                 continue;
             }
@@ -490,7 +496,7 @@ int dis_pass2(int n) {
             s = image_seg_find(target);
             if(s == NULL) {
                 if(o->verbose)
-                    printf("  target %p (offset %p) is not in a segment!\n", target, mem);
+                    printf("    target %p (offset %p) is not in a segment!\n", target, mem);
             }
 
             else {
@@ -531,7 +537,7 @@ int dis_pass2(int n) {
                         }
 
                         else if(o->verbose)
-                            printf("  target %p (reloc at %p) is not in a segment!\n", target, o->reloc[ir].mem);
+                            printf("    target %p (reloc at %p) is not in a segment!\n", target, o->reloc[ir].mem);
                     }
                 }
             }
@@ -539,7 +545,7 @@ int dis_pass2(int n) {
             /* found a vector table, process that too */
             if(vtable != NULL) {
                 if(o->verbose)
-                    printf("  vector table found at %p\n", vtable);
+                    printf("    vector table found at %p\n", vtable);
 
                 vmem = o->reloc[ir].mem - 4;
 

@@ -77,7 +77,7 @@ label_t *label_insert(uint8_t *target, label_type_t type, segment_t *s) {
 
     else if((type & ~0xf) > (label[i].type & ~0xf)) {
         if(o->verbose)
-            printf("  upgrading %p from %02x to %02x\n", target, label[i].type, type);
+            printf("    upgrading %p from %02x to %02x\n", target, label[i].type, type);
         label[i].type = type;
         upgraded++;
     }
