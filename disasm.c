@@ -161,6 +161,11 @@ static void _target_extract(uint8_t *mem, uint8_t **target, label_type_t *type) 
         *type = label_CODE_JUMP;
         *target = mem + 6 + * (int32_t *) (mem+2);
     }
+
+    else {
+        *type = label_NONE;
+        *target = NULL;
+    }
 }
 
 void dis_pass1(void) {
@@ -190,8 +195,6 @@ void dis_pass1(void) {
             len = disasm(mem, line, sizeof(line), 32, 0, 1, 0);
             if(len == 0)
                 len = eatbyte(mem, line, sizeof(line));
-
-            type = label_NONE;
 
             /* this instruction in where the current relocation got applied */
             if(ir < o->nreloc && mem + len > o->reloc[ir].mem &&
@@ -262,6 +265,13 @@ void dis_pass1(void) {
             /* non-relocated instruction */
             else
                 _target_extract(mem, &target, &type);
+
+            if (target == NULL) {
+                if (o->verbose)
+                    printf("  '%s' has no target\n", line);
+                mem += len;
+                continue;
+            }
 
             /* add the label (as long as its in a segment) */
             s = image_seg_find(target);
@@ -398,8 +408,6 @@ int dis_pass2(int n) {
             if(mem + len > l[i].seg->end || (i < nl - 1 && mem + len > l[i + 1].target))
                 break;
 
-            type = label_NONE;
-
             /* this instruction in where the current relocation got applied */
             if(ir < o->nreloc && mem + len > o->reloc[ir].mem &&
                o->reloc[ir].mem >= l[i].seg->start &&
@@ -468,6 +476,13 @@ int dis_pass2(int n) {
             /* non-relocated instruction */
             else
                 _target_extract(mem, &target, &type);
+
+            if (target == NULL) {
+                if (o->verbose)
+                    printf("  '%s' has no target\n", line);
+                mem += len;
+                continue;
+            }
 
             /* add the label (as long as its in a segment) */
             s = image_seg_find(target);
