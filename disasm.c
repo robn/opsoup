@@ -632,11 +632,18 @@ void dis_pass3(FILE *f) {
             /* turn memory-location-looking arguments into labels */
             pos = line;
             while((num = strstr(pos, "0x")) != NULL) {
-                l = label_find((uint8_t *) strtol(num, &rest, 16));
+                if (num[-1] == '-')
+                    l = label_find((uint8_t *) -strtol(num, &rest, 16));
+                else
+                    l = label_find((uint8_t *) strtol(num, &rest, 16));
+
                 if(l == NULL) {
                     pos = rest;
                     continue;
                 }
+
+                if (num[-1] == '-')
+                    num[-1] = '+';
 
                 for(ti = 0; ti < ref[j].ntarget; ti++)
                     if(l->target == ref[j].target[ti])
