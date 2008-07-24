@@ -612,6 +612,11 @@ void dis_pass3(FILE *f) {
         else if((label[i].type & label_CODE_JUMP) == label_CODE_JUMP)
             fprintf(f, "\n\nJUMP_%06d:                  ; off = %x\n\n", label[i].num, (uint32_t) (label[i].target - label[i].seg->start));
 
+        /*
+        if ((label[i].type & label_CODE_JUMP) == label_CODE_JUMP && label[i].num == 2)
+            asm("int3");
+        */
+
         mem = label[i].target;
 
         while(1) {
