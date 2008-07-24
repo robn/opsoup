@@ -651,8 +651,18 @@ void dis_pass3(FILE *f) {
 
                 l = label_find(target);
                 if(l == NULL) {
-                    pos = rest;
-                    continue;
+                    label_type_t type;
+
+                    /* hackishly handle local jumps */
+                    _target_extract(mem, &target, &type);
+
+                    if (type == label_CODE_JUMP)
+                        l = label_find(target);
+
+                    if (l == NULL) {
+                        pos = rest;
+                        continue;
+                    }
                 }
 
                 if (num[-1] == '-')
