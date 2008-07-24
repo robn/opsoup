@@ -56,9 +56,14 @@ int elf_make_segment_table(image_t *image) {
                     type = seg_DATA;
                 break;
 
-            case SHT_NOBITS:
+            case SHT_NOBITS: {
+                uint8_t *alloc = malloc(sh->sh_size);
+                sh->sh_offset = alloc - o->image.core;
+
                 type = seg_BSS;
+
                 break;
+            }
 
             case SHT_REL:
                 type = seg_RELOC;
