@@ -1,5 +1,7 @@
 #include "opsoup.h"
 
+#define OUTPUT_FILE "ffe.asm"
+
 opsoup_t *o;
 
 int main(int argc, char **argv) {
@@ -28,12 +30,12 @@ int main(int argc, char **argv) {
     init_sync();
 
     dis_pass1();
+    */
 
     while(dis_pass2(round)) {
         nref = 0;
         round++;
     }
-    */
 
     label_reloc_upgrade();
 
@@ -41,17 +43,19 @@ int main(int argc, char **argv) {
 
     label_number();
 
-    /*
     f = fopen(OUTPUT_FILE, "w");
     if(f == NULL) {
         printf("main: couldn't open '" OUTPUT_FILE "' for writing: %s\n", strerror(errno));
         return 1;
     }
 
+    /*
     import_output(f);
+    */
 
     dis_pass3(f);
 
+    /*
     data_output(f);
     data_bss_output(f);
 
