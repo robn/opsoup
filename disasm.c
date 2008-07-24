@@ -632,11 +632,19 @@ void dis_pass3(FILE *f) {
             /* turn memory-location-looking arguments into labels */
             pos = line;
             while((num = strstr(pos, "0x")) != NULL) {
-                if (num[-1] == '-')
-                    l = label_find((uint8_t *) -strtol(num, &rest, 16));
-                else
-                    l = label_find((uint8_t *) strtol(num, &rest, 16));
+                uint8_t *target;
 
+                errno = 0;
+                if (num[-1] == '-')
+                    target = (uint8_t *) -strtoul(num, &rest, 16);
+                else
+                    target = (uint8_t *) strtoul(num, &rest, 16);
+                if (errno) {
+                    fprintf(stderr, "dis3: can't convert string starting '%s' to pointer: %s\n", num, strerror(errno));
+                    abort();
+                }
+
+                l = label_find(target);
                 if(l == NULL) {
                     pos = rest;
                     continue;
