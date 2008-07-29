@@ -115,6 +115,7 @@ int elf_relocate(opsoup_t *o) {
     uint32_t *mem;
     intptr_t val;
     int sreloc = 0;
+    label_t *l;
 
     eh = (Elf32_Ehdr *) o->image.core;
 
@@ -163,15 +164,6 @@ int elf_relocate(opsoup_t *o) {
             sym = &symtab[ELF32_R_SYM(rel->r_info)];
             val = (intptr_t) o->image.core + ((Elf32_Shdr *) (o->image.segment[sym->st_shndx].info))->sh_offset + sym->st_value;
 
-            if (o->verbose && sym->st_name) {
-                printf("symbol %d:\n", ELF32_R_SYM(rel->r_info));
-                printf("     name: '%s' (%d)\n", strings + sym->st_name, sym->st_name);
-                printf("    value: 0x%x\n", sym->st_value);
-                printf("     size: 0x%x\n", sym->st_size);
-                printf("  section: '%s' (%d)\n", o->image.segment[sym->st_shndx].name, sym->st_shndx);
-            //    printf("  applying symbol '%s' (%x) at 0x%08x, value 0x%08x\n", strings + sym->st_name, sym->st_name, (unsigned int) mem, val);
-            }
-
             switch (ELF32_R_TYPE(rel->r_info)) {
                 case R_386_32:
                     *mem += val;
@@ -199,7 +191,12 @@ int elf_relocate(opsoup_t *o) {
                 printf("  added reloc offset 0x%x target 0x%x\n", o->reloc[o->nreloc].off, o->reloc[o->nreloc].target);
             */
 
-            label_insert(o->reloc[o->nreloc].target, label_RELOC, target_segment);
+            l = label_insert(o->reloc[o->nreloc].target, label_RELOC, target_segment);
+            if (sym->st_name && *(strings + sym->st_name) != '\0') {
+                l->name = strings + sym->st_name;
+                if (o->verbose)
+                    printf("  added named reloc label '%s'\n", l->name);
+            }
 
             o->nreloc++;
         }
