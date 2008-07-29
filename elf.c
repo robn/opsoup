@@ -104,6 +104,8 @@ int elf_make_segment_table(image_t *image) {
 }
 
 int elf_relocate(opsoup_t *o) {
+    Elf32_Ehdr *eh;
+    char *strings;
     int i, j;
     segment_t *reloc_segment, *target_segment;
     Elf32_Shdr *sh, *shsymtab;
@@ -113,6 +115,21 @@ int elf_relocate(opsoup_t *o) {
     uint32_t *mem;
     intptr_t val;
     int sreloc = 0;
+
+    eh = (Elf32_Ehdr *) o->image.core;
+
+    sh = (Elf32_Shdr *) (o->image.core + eh->e_shoff + eh->e_shstrndx * eh->e_shentsize);
+
+    for (i = 0; o->image.segment[i].name != NULL; i++) {
+        if (o->image.segment[i].type != seg_NONE)
+            continue;
+
+        if (strcmp(o->image.segment[i].name, ".strtab") != 0)
+            continue;
+
+        strings = (char *) o->image.segment[i].start;
+        break;
+    }
 
     if (o->reloc != NULL) {
         free(o->reloc);
@@ -146,10 +163,14 @@ int elf_relocate(opsoup_t *o) {
             sym = &symtab[ELF32_R_SYM(rel->r_info)];
             val = (intptr_t) o->image.core + ((Elf32_Shdr *) (o->image.segment[sym->st_shndx].info))->sh_offset + sym->st_value;
 
-            /*
-            if (o->verbose)
-                printf("  applying symbol '%s' at 0x%08x, value 0x%08x\n", o->image.core + ((Elf32_Shdr *) (o->image.segment[((Elf32_Shdr *) (reloc_segment->info))->sh_link].info))->sh_offset + sym->st_shndx, (unsigned int) mem, val);
-            */
+            if (o->verbose && sym->st_name) {
+                printf("symbol %d:\n", ELF32_R_SYM(rel->r_info));
+                printf("     name: '%s' (%d)\n", strings + sym->st_name, sym->st_name);
+                printf("    value: 0x%x\n", sym->st_value);
+                printf("     size: 0x%x\n", sym->st_size);
+                printf("  section: '%s' (%d)\n", o->image.segment[sym->st_shndx].name, sym->st_shndx);
+            //    printf("  applying symbol '%s' (%x) at 0x%08x, value 0x%08x\n", strings + sym->st_name, sym->st_name, (unsigned int) mem, val);
+            }
 
             switch (ELF32_R_TYPE(rel->r_info)) {
                 case R_386_32:
