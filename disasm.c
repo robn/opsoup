@@ -607,7 +607,9 @@ void dis_pass3(FILE *f) {
         if(!(label[i].type & label_CODE)) continue;
 
         /* output the label */
-        if((label[i].type & label_CODE_CALL) == label_CODE_CALL)
+        if (label[i].name)
+            fprintf(f, "\n\n%s:                     ; off = %x\n\n", label[i].name, (uint32_t) (label[i].target - label[i].seg->start));
+        else if((label[i].type & label_CODE_CALL) == label_CODE_CALL)
             fprintf(f, "\n\nCALL_%06d:                  ; off = %x\n\n", label[i].num, (uint32_t) (label[i].target - label[i].seg->start));
         else if((label[i].type & label_CODE_JUMP) == label_CODE_JUMP)
             fprintf(f, "\n\nJUMP_%06d:                  ; off = %x\n\n", label[i].num, (uint32_t) (label[i].target - label[i].seg->start));
@@ -679,7 +681,9 @@ void dis_pass3(FILE *f) {
 
                 *num = '\0';
 
-                if((l->type & label_CODE_CALL) == label_CODE_CALL)
+                if (l->name)
+                    sprintf(line2, "%s%s", line, l->name);
+                else if((l->type & label_CODE_CALL) == label_CODE_CALL)
                     sprintf(line2, "%sCALL_%06d", line, l->num);
                 else if((l->type & label_CODE_JUMP) == label_CODE_JUMP)
                     sprintf(line2, "%sJUMP_%06d", line, l->num);
