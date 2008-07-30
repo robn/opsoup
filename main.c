@@ -18,7 +18,6 @@ int main(int argc, char **argv) {
     if(image_load() != 0)
         return 1;
 
-#if 0
     init_sync();
 
     dis_pass1();
@@ -72,7 +71,6 @@ int main(int argc, char **argv) {
 
     fclose(f);
     */
-#endif
 
     return 0;
 }
