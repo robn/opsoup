@@ -29,6 +29,8 @@ int image_load(void) {
         return 1;
     }
 
+    elf_load_labels(o);
+
     if (elf_relocate(o) < 0) {
         fprintf(stderr, "load: relocation failed\n");
         return 1;

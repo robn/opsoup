@@ -103,6 +103,60 @@ int elf_make_segment_table(image_t *image) {
     return 0;
 }
 
+void elf_load_labels(opsoup_t *o) {
+    Elf32_Ehdr *eh;
+    Elf32_Shdr *sh;
+    char *strings;
+    Elf32_Sym *symtab;
+    int nsyms, i;
+    label_t *l;
+
+    eh = (Elf32_Ehdr *) o->image.core;
+
+    sh = (Elf32_Shdr *) (o->image.core + eh->e_shoff + eh->e_shstrndx * eh->e_shentsize);
+
+    for (i = 0; o->image.segment[i].name != NULL; i++) {
+        if (o->image.segment[i].type != seg_NONE)
+            continue;
+
+        if (strcmp(o->image.segment[i].name, ".strtab") == 0) {
+            strings = (char *) o->image.segment[i].start;
+            continue;
+        }
+
+        if (strcmp(o->image.segment[i].name, ".symtab") == 0) {
+            symtab = (Elf32_Sym *) o->image.segment[i].start;
+            nsyms = o->image.segment[i].size / sizeof(Elf32_Sym);
+            continue;
+        }
+    }
+
+    for (i = 0; i < nsyms; i++) {
+        if (*(strings + symtab[i].st_name) != '\0') {
+            switch (symtab[i].st_shndx) {
+                case SHN_UNDEF:
+                    /* !!! imports? */
+                    if (o->verbose)
+                        printf("  skipped external symbol '%s'\n", strings + symtab[i].st_name);
+                    break;
+
+                case SHN_ABS:
+                case SHN_COMMON:
+                    if (o->verbose)
+                        printf("  skipped absolute or common symbol '%s'\n", strings + symtab[i].st_name);
+                    break;
+
+                default:
+                    l = label_insert(o->image.segment[symtab[i].st_shndx].start + symtab[i].st_value, label_NAME, &o->image.segment[symtab[i].st_shndx]);
+                    l->name = strings + symtab[i].st_name;
+                    if (o->verbose)
+                        printf("  added name '%s' in section '%s'\n", l->name, l->seg->name);
+                    break;
+            }
+        }
+    }
+}
+
 int elf_relocate(opsoup_t *o) {
     Elf32_Ehdr *eh;
     char *strings;
@@ -115,7 +169,6 @@ int elf_relocate(opsoup_t *o) {
     uint32_t *mem;
     intptr_t val;
     int sreloc = 0;
-    label_t *l;
 
     eh = (Elf32_Ehdr *) o->image.core;
 
@@ -191,12 +244,7 @@ int elf_relocate(opsoup_t *o) {
                 printf("  added reloc offset 0x%x target 0x%x\n", o->reloc[o->nreloc].off, o->reloc[o->nreloc].target);
             */
 
-            l = label_insert(o->reloc[o->nreloc].target, label_RELOC, target_segment);
-            if (sym->st_name && *(strings + sym->st_name) != '\0') {
-                l->name = strings + sym->st_name;
-                if (o->verbose)
-                    printf("  added named reloc label '%s'\n", l->name);
-            }
+            label_insert(o->reloc[o->nreloc].target, label_RELOC, target_segment);
 
             o->nreloc++;
         }

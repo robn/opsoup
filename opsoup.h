@@ -72,20 +72,22 @@ typedef enum {
     label_NONE          = 0x0,
 
     label_VTABLE        = 0x1,      /* vtable mask */
+
+    label_NAME          = 0x10,     /* named label only, no semantic value */
     
-    label_RELOC         = 0x10,     /* relocation target */
+    label_RELOC         = 0x20,     /* relocation target */
 
-    label_DATA          = 0x20,     /* data item */
-    label_DATA_VTABLE   = 0x21,     /* jump/call vector table */
+    label_DATA          = 0x40,     /* data item */
+    label_DATA_VTABLE   = 0x41,     /* jump/call vector table */
 
-    label_BSS           = 0x40,     /* uninitialised data item */
-    label_BSS_VTABLE    = 0x41,     /* uninitialised jump/call vector table */
+    label_BSS           = 0x80,     /* uninitialised data item */
+    label_BSS_VTABLE    = 0x81,     /* uninitialised jump/call vector table */
 
-    label_CODE          = 0x80,     /* code item */
-    label_CODE_JUMP     = 0x82,     /* jump point ("jmp" instruction target) */
-    label_CODE_CALL     = 0x84,     /* call point ("call" instruction target) */
+    label_CODE          = 0x100,    /* code item */
+    label_CODE_JUMP     = 0x102,    /* jump point ("jmp" instruction target) */
+    label_CODE_CALL     = 0x104,    /* call point ("call" instruction target) */
 
-    label_IMPORT        = 0x100     /* vector to imported function */
+    label_IMPORT        = 0x200     /* vector to imported function */
 } label_type_t;
 
 /* extra magic for import labels */
@@ -156,6 +158,7 @@ void    data_bss_output(FILE *f);
 
 /* elf stuff */
 int elf_make_segment_table(image_t *image);
+void elf_load_labels(opsoup_t *o);
 int elf_relocate(opsoup_t *o);
 
 #endif
