@@ -73,6 +73,9 @@ label_t *label_insert(uint8_t *target, label_type_t type, segment_t *s) {
         label[i].type = type;
         label[i].seg = s;
         label[i].num = 0;
+
+        if (o->verbose)
+            printf("    added label %p type %02x\n", target, type);
     }
 
     else if((type & ~0xf) > (label[i].type & ~0xf)) {
@@ -81,6 +84,9 @@ label_t *label_insert(uint8_t *target, label_type_t type, segment_t *s) {
         label[i].type = type;
         upgraded++;
     }
+    
+    else if (o->verbose)
+        printf ("    reused label %p type %02x\n", label[i].target, label[i].type);
 
     return &(label[i]);
 }

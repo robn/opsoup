@@ -196,9 +196,6 @@ void dis_pass1(void) {
             if(len == 0)
                 len = eatbyte(mem, line, sizeof(line));
 
-            if (o->verbose)
-                printf("  %s\n", line);
-
             /* this instruction in where the current relocation got applied */
             if(ir < o->nreloc && mem + len > o->reloc[ir].mem &&
                o->reloc[ir].mem >= o->image.segment[i].start &&
@@ -210,8 +207,11 @@ void dis_pass1(void) {
                 /* identifying what type of data the target points to */
                 s = image_seg_find(target);
                 if(s == NULL) {
-                    if(o->verbose)
+                    if(o->verbose) {
+                        printf("  %x: %s\n", mem - o->image.segment[i].start, line);
                         printf("    target %p (reloc at %p) is not in a segment!\n", target, o->reloc[ir].mem);
+                        asm("int3");
+                    }
                     mem += len;
                     continue;
                 }
@@ -271,11 +271,12 @@ void dis_pass1(void) {
                 _target_extract(mem, &target, &type);
 
             if (target == NULL) {
-                if (o->verbose)
-                    printf("    no target\n");
                 mem += len;
                 continue;
             }
+
+            if (o->verbose)
+                printf("  %x: %s\n", mem - o->image.segment[i].start, line);
 
             /* add the label (as long as its in a segment) */
             s = image_seg_find(target);
