@@ -136,21 +136,27 @@ void elf_load_labels(opsoup_t *o) {
             switch (symtab[i].st_shndx) {
                 case SHN_UNDEF:
                     /* !!! imports? */
+                    /*
                     if (o->verbose)
                         printf("  skipped external symbol '%s'\n", strings + symtab[i].st_name);
+                    */
                     break;
 
                 case SHN_ABS:
                 case SHN_COMMON:
+                    /*
                     if (o->verbose)
                         printf("  skipped absolute or common symbol '%s'\n", strings + symtab[i].st_name);
+                    */
                     break;
 
                 default:
                     l = label_insert(o->image.segment[symtab[i].st_shndx].start + symtab[i].st_value, label_NAME, &o->image.segment[symtab[i].st_shndx]);
                     l->name = strings + symtab[i].st_name;
+                    /*
                     if (o->verbose)
                         printf("  added name '%s' in section '%s'\n", l->name, l->seg->name);
+                    */
                     break;
             }
         }
