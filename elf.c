@@ -218,12 +218,19 @@ int elf_relocate(opsoup_t *o) {
             
             mem = (uint32_t *) (o->image.core + sh->sh_offset + rel->r_offset);
 
+            if (o->nreloc == sreloc) {
+                sreloc += 1024;
+                o->reloc = (reloc_t *) realloc(o->reloc, sizeof (reloc_t) * sreloc);
+            }
+            o->reloc[o->nreloc].mem = (uint8_t *) mem;
+
             sym = &symtab[ELF32_R_SYM(rel->r_info)];
 
             if (sym->st_shndx == SHN_UNDEF) {
-                *mem = (intptr_t) sym;
+                *mem = (uint32_t) sym - 5;  /* !!! assuming CALL (e8), five bytes */
 
-                label_insert((uint8_t *) *mem, label_IMPORT, target_segment);
+                label_insert((uint8_t *) sym, label_IMPORT, target_segment);
+                o->reloc[o->nreloc].target = (uint8_t *) sym;
             }
 
             else {
@@ -244,15 +251,8 @@ int elf_relocate(opsoup_t *o) {
                 }
 
                 label_insert((uint8_t *) *mem, label_RELOC, target_segment);
+                o->reloc[o->nreloc].target = (uint8_t *) *mem;
             }
-
-            if (o->nreloc == sreloc) {
-                sreloc += 1024;
-                o->reloc = (reloc_t *) realloc(o->reloc, sizeof (reloc_t) * sreloc);
-            }
-
-            o->reloc[o->nreloc].mem = (uint8_t *) mem;
-            o->reloc[o->nreloc].target = (uint8_t *) *mem;
 
             o->nreloc++;
 
