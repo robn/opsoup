@@ -135,11 +135,11 @@ void elf_load_labels(opsoup_t *o) {
         if (*(strings + symtab[i].st_name) != '\0') {
             switch (symtab[i].st_shndx) {
                 case SHN_UNDEF:
-                    /* !!! imports? */
-                    /*
+                    l = label_insert((uint8_t *) &symtab[i], label_IMPORT, &o->image.segment[symtab[i].st_shndx]);
+                    l->name = strings + symtab[i].st_name;
+
                     if (o->verbose)
-                        printf("  skipped external symbol '%s'\n", strings + symtab[i].st_name);
-                    */
+                        printf("  added external name '%s' in section '%s'\n", l->name, l->seg->name);
                     break;
 
                 case SHN_ABS:
@@ -153,10 +153,8 @@ void elf_load_labels(opsoup_t *o) {
                 default:
                     l = label_insert(o->image.segment[symtab[i].st_shndx].start + symtab[i].st_value, label_NAME, &o->image.segment[symtab[i].st_shndx]);
                     l->name = strings + symtab[i].st_name;
-                    /*
                     if (o->verbose)
                         printf("  added name '%s' in section '%s'\n", l->name, l->seg->name);
-                    */
                     break;
             }
         }
@@ -221,20 +219,31 @@ int elf_relocate(opsoup_t *o) {
             mem = (uint32_t *) (o->image.core + sh->sh_offset + rel->r_offset);
 
             sym = &symtab[ELF32_R_SYM(rel->r_info)];
-            val = (intptr_t) o->image.core + ((Elf32_Shdr *) (o->image.segment[sym->st_shndx].info))->sh_offset + sym->st_value;
 
-            switch (ELF32_R_TYPE(rel->r_info)) {
-                case R_386_32:
-                    *mem += val;
-                    break;
+            if (sym->st_shndx == SHN_UNDEF) {
+                *mem = (intptr_t) sym;
 
-                case R_386_PC32:
-                    *mem += val - (intptr_t) mem;
-                    break;
+                label_insert((uint8_t *) *mem, label_IMPORT, target_segment);
+            }
 
-                default:
-                    fprintf(stderr, "elf: unknown relocation type %d\n", ELF32_R_TYPE(rel->r_info));
-                    return -1;
+            else {
+                val = (intptr_t) o->image.core + ((Elf32_Shdr *) (o->image.segment[sym->st_shndx].info))->sh_offset + sym->st_value;
+
+                switch (ELF32_R_TYPE(rel->r_info)) {
+                    case R_386_32:
+                        *mem += val;
+                        break;
+
+                    case R_386_PC32:
+                        *mem += val - (intptr_t) mem;
+                        break;
+
+                    default:
+                        fprintf(stderr, "elf: unknown relocation type %d\n", ELF32_R_TYPE(rel->r_info));
+                        return -1;
+                }
+
+                label_insert((uint8_t *) *mem, label_RELOC, target_segment);
             }
 
             if (o->nreloc == sreloc) {
@@ -245,14 +254,12 @@ int elf_relocate(opsoup_t *o) {
             o->reloc[o->nreloc].mem = (uint8_t *) mem;
             o->reloc[o->nreloc].target = (uint8_t *) *mem;
 
+            o->nreloc++;
+
             /*
             if (o->verbose)
                 printf("  added reloc offset 0x%x target 0x%x\n", o->reloc[o->nreloc].off, o->reloc[o->nreloc].target);
             */
-
-            label_insert(o->reloc[o->nreloc].target, label_RELOC, target_segment);
-
-            o->nreloc++;
         }
 
         label_print_count("reloc");

@@ -210,7 +210,6 @@ void dis_pass1(void) {
                     if(o->verbose) {
                         printf("  %x: %s\n", mem - o->image.segment[i].start, line);
                         printf("    target %p (reloc at %p) is not in a segment!\n", target, o->reloc[ir].mem);
-                        asm("int3");
                     }
                     mem += len;
                     continue;
