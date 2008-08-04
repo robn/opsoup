@@ -227,7 +227,11 @@ int elf_relocate(opsoup_t *o) {
             sym = &symtab[ELF32_R_SYM(rel->r_info)];
 
             if (sym->st_shndx == SHN_UNDEF) {
-                *mem = (uint32_t) sym - 5;  /* !!! assuming CALL (e8), five bytes */
+                /* !!! call (e8), five byte offset */
+                if (mem[-1] == 0xe8)
+                    *mem = (uint32_t) sym - 5;
+                else
+                    *mem = (uint32_t) sym;
 
                 label_insert((uint8_t *) sym, label_IMPORT, target_segment);
                 o->reloc[o->nreloc].target = (uint8_t *) sym;
