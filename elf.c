@@ -139,7 +139,7 @@ void elf_load_labels(opsoup_t *o) {
                     l->name = strings + symtab[i].st_name;
 
                     if (o->verbose)
-                        printf("  added external name '%s' in section '%s'\n", l->name, l->seg->name);
+                        printf("  added external name '%s'\n", l->name);
                     break;
 
                 case SHN_ABS:
