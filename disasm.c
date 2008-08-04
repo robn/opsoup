@@ -692,6 +692,8 @@ void dis_pass3(FILE *f) {
                         sprintf(line2, "%sIMPORT_%s_%d", line, l->import.dllname, l->import.hint);
                 }
 
+                l->count++;
+
                 /* keep track of the start of the rest of the line, so we can get more numbers */
                 pos = strchr(line2, '\0');
                 sprintf(pos, "%s", rest);

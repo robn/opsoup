@@ -193,3 +193,11 @@ void label_number(void) {
     
     printf("labels: call %d jump %d data %d bss %d\n", cc, jc, dc, bc);
 }
+
+void label_print_unused(void) {
+    int i;
+
+    for (i = 0; i < nlabel; i++)
+        if (label[i].count == 0)
+            printf("  unused label '%s' at %p\n", label[i].name, label[i].target);
+}
