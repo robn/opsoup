@@ -655,10 +655,9 @@ void dis_pass3(FILE *f) {
                 if(l == NULL) {
                     label_type_t type;
 
-                    /* hackishly handle local jumps */
                     _target_extract(mem, &target, &type);
 
-                    if (type == label_CODE_JUMP)
+                    if (type != label_NONE)
                         l = label_find(target);
 
                     if (l == NULL) {
