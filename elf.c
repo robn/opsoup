@@ -228,7 +228,7 @@ int elf_relocate(opsoup_t *o) {
 
             if (sym->st_shndx == SHN_UNDEF) {
                 /* !!! call (e8), five byte offset */
-                if (mem[-1] == 0xe8)
+                if (((uint8_t *) mem)[-1] == 0xe8)
                     *mem = (uint32_t) sym - 5;
                 else
                     *mem = (uint32_t) sym;
