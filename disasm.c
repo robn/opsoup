@@ -169,7 +169,7 @@ static void _target_extract(uint8_t *mem, uint8_t **target, label_type_t *type) 
 }
 
 void dis_pass1(void) {
-    int i, len, ir = 0;
+    int i, len, ir = 0, vir;
     uint8_t *mem, *target, *vtable, *vmem;
     label_type_t type, vtype;
     char line[256];
@@ -332,32 +332,40 @@ void dis_pass1(void) {
                 if(o->verbose)
                     printf("    vector table found at %p\n", vtable);
 
-                vmem = o->reloc[ir].mem - 4;
+                for (vir = 0; vir < o->nreloc; vir++)
+                    if (o->reloc[vir].mem == vtable)
+                        break;
 
-                /* keep going as long as relocations happen every dword */
-                while(o->reloc[ir].mem == vmem + 4) {
-                    s = image_seg_find(o->reloc[ir].target);
+                if (vir == o->nreloc && o->verbose) 
+                    printf("    couldn't find first relocation for vector table!\n");
 
-                    if(s == NULL || s->type == seg_BSS)
-                        type = label_BSS;
+                else {
+                    vmem = vtable - 4;
 
-                    else if(vtype & label_CODE && s->type == seg_DATA)
-                        type = label_DATA;
+                    /* keep going as long as relocations happen every dword */
+                    while(o->reloc[vir].mem == vmem + 4) {
+                        s = image_seg_find(o->reloc[vir].target);
 
-                    else
-                        type = vtype;
+                        if(s == NULL || s->type == seg_BSS)
+                            type = label_BSS;
 
-                    /* add the label */
-                    label_insert(o->reloc[ir].target, type, s);
+                        else if(vtype & label_CODE && s->type == seg_DATA)
+                            type = label_DATA;
 
-                    ref_insert(o->reloc[ir].mem, o->reloc[ir].target);
+                        else
+                            type = vtype;
 
-                    /* next reloc, next vector */
-                    ir++;
-                    vmem += 4;
+                        /* add the label */
+                        label_insert(o->reloc[vir].target, type, s);
+
+                        ref_insert(o->reloc[ir].mem, o->reloc[ir].target);
+
+                        /* next reloc, next vector */
+                        vir++;
+                        vmem += 4;
+                    }
                 }
 
-                ir--;
                 vtable = NULL;
             }
 
@@ -376,7 +384,7 @@ void dis_pass1(void) {
 
 int dis_pass2(int n) {
     label_t *l;
-    int nl, i, ir = 0, len;
+    int nl, i, ir = 0, vir, len;
     uint8_t *mem, *target, *vtable = NULL, *vmem;
     char line[256];
     label_type_t type, vtype;
@@ -547,33 +555,40 @@ int dis_pass2(int n) {
                 if(o->verbose)
                     printf("    vector table found at %p\n", vtable);
 
-                vmem = o->reloc[ir].mem - 4;
+                for (vir = 0; vir < o->nreloc; vir++)
+                    if (o->reloc[vir].mem == vtable)
+                        break;
 
-                /* keep going as long as relocations happen every dword */
-                while(o->reloc[ir].mem == vmem + 4) {
-                    s = image_seg_find(o->reloc[ir].target);
+                if (vir == o->nreloc && o->verbose) 
+                    printf("    couldn't find first relocation for vector table!\n");
 
-                    if(s == NULL || s->type == seg_BSS)
-                        type = label_BSS;
+                else {
+                    vmem = vtable - 4;
 
-                    else if(vtype & label_CODE && s->type == seg_DATA)
-                        type = label_DATA;
+                    /* keep going as long as relocations happen every dword */
+                    while(o->reloc[vir].mem == vmem + 4) {
+                        s = image_seg_find(o->reloc[vir].target);
 
-                    else
-                        type = vtype;
+                        if(s == NULL || s->type == seg_BSS)
+                            type = label_BSS;
 
-                    /* add the label */
-                    label_insert(o->reloc[ir].target, type, s);
+                        else if(vtype & label_CODE && s->type == seg_DATA)
+                            type = label_DATA;
 
-                    /* and a reference to it */
-                    ref_insert(o->reloc[ir].mem, o->reloc[ir].target);
+                        else
+                            type = vtype;
 
-                    /* next reloc, next vector */
-                    ir++;
-                    vmem += 4;
+                        /* add the label */
+                        label_insert(o->reloc[vir].target, type, s);
+
+                        ref_insert(o->reloc[ir].mem, o->reloc[ir].target);
+
+                        /* next reloc, next vector */
+                        vir++;
+                        vmem += 4;
+                    }
                 }
 
-                ir--;
                 vtable = NULL;
             }
 
