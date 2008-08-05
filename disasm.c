@@ -408,9 +408,6 @@ int dis_pass2(int n) {
             if(len == 0)
                 len = eatbyte(mem, line, sizeof(line));
 
-            if (o->verbose)
-                printf("  %s\n", line);
-
             /* bail if we've gone past the next label */
             if(mem + len > l[i].seg->end || (i < nl - 1 && mem + len > l[i + 1].target))
                 break;
@@ -425,8 +422,10 @@ int dis_pass2(int n) {
                 /* identifying what type of data the target points to */
                 s = image_seg_find(target);
                 if(s == NULL) {
-                    if(o->verbose)
+                    if(o->verbose) {
+                        printf("  %x: %s\n", mem - l[i].seg->start, line);
                         printf("    target %p (reloc at %p) is not in a segment!\n", target, o->reloc[ir].mem);
+                    }
                     mem += len;
                     continue;
                 }
@@ -486,11 +485,12 @@ int dis_pass2(int n) {
                 _target_extract(mem, &target, &type);
 
             if (target == NULL) {
-                if (o->verbose)
-                    printf("    no target\n");
                 mem += len;
                 continue;
             }
+
+            if (o->verbose)
+                printf("  %x: %s\n", mem - l[i].seg->start, line);
 
             /* add the label (as long as its in a segment) */
             s = image_seg_find(target);
