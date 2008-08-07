@@ -135,7 +135,7 @@ void elf_load_labels(opsoup_t *o) {
         if (*(strings + symtab[i].st_name) != '\0') {
             switch (symtab[i].st_shndx) {
                 case SHN_UNDEF:
-                    l = label_insert((uint8_t *) &symtab[i], label_IMPORT, &o->image.segment[symtab[i].st_shndx]);
+                    l = label_insert((uint8_t *) &symtab[i], label_EXTERN, &o->image.segment[symtab[i].st_shndx]);
                     l->name = strings + symtab[i].st_name;
 
                     if (o->verbose)
@@ -233,7 +233,7 @@ int elf_relocate(opsoup_t *o) {
                 else
                     *mem = (uint32_t) sym;
 
-                label_insert((uint8_t *) sym, label_IMPORT, target_segment);
+                label_insert((uint8_t *) sym, label_EXTERN, target_segment);
                 o->reloc[o->nreloc].target = (uint8_t *) sym;
             }
 

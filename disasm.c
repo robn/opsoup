@@ -700,12 +700,6 @@ void dis_pass3(FILE *f) {
                     sprintf(line2, "%sBSS_%06d", line, l->num);
                 else if(l->type & label_DATA)
                     sprintf(line2, "%sDATA_%06d", line, l->num);
-                else if(l->type & label_IMPORT) {
-                    if(l->import.symbol != NULL)
-                        sprintf(line2, "%sIMPORT_%s", line, l->import.symbol);
-                    else
-                        sprintf(line2, "%sIMPORT_%s_%d", line, l->import.dllname, l->import.hint);
-                }
 
                 l->count++;
 

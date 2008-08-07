@@ -55,12 +55,6 @@ void data_output(FILE *f) {
                         fprintf(f, "    dd BSS_%06d\n", l->num);
                     else if(l->type & label_DATA)
                         fprintf(f, "    dd DATA_%06d\n", l->num);
-                    else if(l->type & label_IMPORT) {
-                        if(l->import.symbol != NULL)
-                            fprintf(f, "    dd IMPORT_%s\n", l->import.symbol);
-                        else
-                            fprintf(f, "    dd IMPORT_%s_%d\n", l->import.dllname, l->import.hint);
-                    }
                     else
                         l = NULL;
                 }

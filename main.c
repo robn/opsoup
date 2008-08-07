@@ -22,16 +22,6 @@ int main(int argc, char **argv) {
 
     dis_pass1();
 
-    /*
-    reloc_apply();
-
-    import_process();
-
-    init_sync();
-
-    dis_pass1();
-    */
-
     while(dis_pass2(round)) {
         o->nref = 0;
         round++;
@@ -48,10 +38,6 @@ int main(int argc, char **argv) {
         printf("main: couldn't open '" OUTPUT_FILE "' for writing: %s\n", strerror(errno));
         return 1;
     }
-
-    /*
-    import_output(f);
-    */
 
     dis_pass3(f);
 
