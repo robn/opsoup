@@ -89,6 +89,14 @@ typedef struct label_st {
     import_t        import;         /* import fu */
 } label_t;
 
+#define MAX_REF_TARGET (4)
+
+typedef struct ref_st {
+    uint8_t        *mem;                    /* location of the reference */
+    uint8_t        *target[MAX_REF_TARGET]; /* location of target labels */
+    int             ntarget;                /* number of targets */
+} ref_t;
+
 typedef struct _opsoup_st {
     image_t          image;
 
@@ -98,6 +106,9 @@ typedef struct _opsoup_st {
     label_t         *label;
     int             nlabel, slabel;
     int             added, upgraded;
+
+    ref_t           *ref;
+    int              nref, sref;
 
     int              verbose;
 } opsoup_t;
@@ -116,22 +127,6 @@ void            label_reloc_upgrade(void);
 int             label_print_count(char *str);
 void            label_number(void);
 void            label_print_unused(void);
-
-
-/* label references */
-
-/* max possible targets per offset */
-#define MAX_REF_TARGET (4)
-
-/* reference data */
-typedef struct ref_st {
-    uint8_t       *mem;                    /* location of the reference (eg instruction that uses the label */
-    uint8_t       *target[MAX_REF_TARGET]; /* location of target labels (one instruction can use more than one label) */    
-    int             ntarget;                /* number of targets */
-} ref_t;
-
-extern ref_t    *ref;
-extern int      nref;
 
 ref_t           *ref_insert(uint8_t *source, uint8_t *target);
 

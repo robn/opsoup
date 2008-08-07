@@ -1,12 +1,9 @@
 #include "opsoup.h"
 
-ref_t *ref = NULL;
-int nref = 0, sref = 0;
-
-/* find a ref, return its index */
+/* find a o->ref, return its index */
 static int _ref_find_ll(uint8_t *mem) {
-    ref_t *rf = ref;
-    int nrf = nref, abs = 0, i = 1;
+    ref_t *rf = o->ref;
+    int nrf = o->nref, abs = 0, i = 1;
 
     if(rf == NULL)
         return -1;
@@ -42,39 +39,39 @@ ref_t *ref_insert(uint8_t *mem, uint8_t *target) {
     if(i < 0) {
         /* not found, search forward for the insertion point */
         i = -i - 1;
-        for(; i < nref && ref[i].mem < mem; i++);
+        for(; i < o->nref && o->ref[i].mem < mem; i++);
 
         /* make space if necessary */
-        if(nref == sref) {
-            sref += 1024;
-            ref = (ref_t *) realloc(ref, sizeof(ref_t) * sref);
+        if(o->nref == o->sref) {
+            o->sref += 1024;
+            o->ref = (ref_t *) realloc(o->ref, sizeof(ref_t) * o->sref);
         }
 
-        if(i < nref)
-            memmove(&(ref[i + 1]), &(ref[i]), sizeof(ref_t) * (nref - i));
+        if(i < o->nref)
+            memmove(&(o->ref[i + 1]), &(o->ref[i]), sizeof(ref_t) * (o->nref - i));
 
-        nref++;
+        o->nref++;
 
         /* fill it out */
-        ref[i].mem = mem;
-        ref[i].ntarget = 0;
+        o->ref[i].mem = mem;
+        o->ref[i].ntarget = 0;
     }
 
     /* if we've already got this target on this reference, just return it */
-    for(ti = 0; ti < ref[i].ntarget; ti++)
-        if(ref[i].target[ti] == target)
-            return &(ref[i]);
+    for(ti = 0; ti < o->ref[i].ntarget; ti++)
+        if(o->ref[i].target[ti] == target)
+            return &(o->ref[i]);
 
     /* fail if we can't add any more targets */
-    if(ref[i].ntarget == MAX_REF_TARGET) {
+    if(o->ref[i].ntarget == MAX_REF_TARGET) {
         if(o->verbose)
             printf("  more than %d targets for label ref %p\n", MAX_REF_TARGET, mem);
-        return &(ref[i]);
+        return &(o->ref[i]);
     }
 
     /* add the target */
-    ref[i].target[ref[i].ntarget] = target;
-    ref[i].ntarget++;
+    o->ref[i].target[o->ref[i].ntarget] = target;
+    o->ref[i].ntarget++;
 
-    return &(ref[i]);
+    return &(o->ref[i]);
 }

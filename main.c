@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
     */
 
     while(dis_pass2(round)) {
-        nref = 0;
+        o->nref = 0;
         round++;
     }
 

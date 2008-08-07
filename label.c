@@ -104,9 +104,9 @@ void label_ref_check(void) {
     int i, j;
     // segment_t *s;
 
-    for(i = 0; i < nref; i++)
-        for(j = 0; j < ref[i].ntarget; j++)
-            (label_find(ref[i].target[j]))->num++;
+    for(i = 0; i < o->nref; i++)
+        for(j = 0; j < o->ref[i].ntarget; j++)
+            (label_find(o->ref[i].target[j]))->num++;
     
     i = 0;
     while(i < o->nlabel) {

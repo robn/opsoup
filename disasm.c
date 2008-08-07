@@ -633,8 +633,8 @@ void dis_pass3(FILE *f) {
 
         while(1) {
             /* get to the nearest reference from this instruction */
-            for(; j < nref; j++)
-                if(ref[j].mem >= mem)
+            for(; j < o->nref; j++)
+                if(o->ref[j].mem >= mem)
                     break;
 
             /* get a line */
@@ -679,11 +679,11 @@ void dis_pass3(FILE *f) {
                 if (num[-1] == '-')
                     num[-1] = '+';
 
-                for(ti = 0; ti < ref[j].ntarget; ti++)
-                    if(l->target == ref[j].target[ti])
+                for(ti = 0; ti < o->ref[j].ntarget; ti++)
+                    if(l->target == o->ref[j].target[ti])
                         break;
 
-                if(ti == ref[j].ntarget) {
+                if(ti == o->ref[j].ntarget) {
                     pos = rest;
                     continue;
                 }
