@@ -41,26 +41,12 @@ int main(int argc, char **argv) {
 
     dis_pass3(f);
 
-    /*
     data_output(f);
     data_bss_output(f);
-    */
 
     fclose(f);
 
-    /*
-    f = fopen(OUTPUT_STUB, "w");
-    if(f == NULL) {
-        printf("main: couldn't open '" OUTPUT_STUB "' for writing: %s\n", strerror(errno));
-        return 1;
-    }
-
-    import_stub(f);
-
-    fclose(f);
-
-    label_print_unused();
-    */
+    //label_print_unused();
 
     return 0;
 }
