@@ -22,7 +22,6 @@ typedef enum {
     seg_CODE,
     seg_DATA,
     seg_BSS,
-    seg_IMPORT,
     seg_RELOC
 } segment_type_t;
 
