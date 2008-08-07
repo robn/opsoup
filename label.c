@@ -82,7 +82,7 @@ label_t *label_insert(uint8_t *target, label_type_t type, segment_t *s) {
     }
     
     else if (o->verbose)
-        printf ("    reused label %p type %02x\n", o->label[i].target, o->label[i].type);
+        printf ("    reused label %p (%s) type %02x\n", o->label[i].target, o->label[i].name ? o->label[i].name : "(anon)", o->label[i].type);
 
     return &(o->label[i]);
 }
@@ -140,7 +140,7 @@ void label_reloc_upgrade(void) {
     for(i = 0; i < o->nlabel; i++) {
         if(!(o->label[i].type & label_RELOC)) continue;
         if(o->verbose)
-            printf("  upgrading %p from %02x to %02x\n", o->label[i].target, o->label[i].type, label_DATA);
+            printf("  upgrading %p (%s) from %02x to %02x\n", o->label[i].target, o->label[i].name ? o->label[i].name : "(anon)", o->label[i].type, label_DATA);
         o->label[i].type = label_DATA;
         o->upgraded++;
     }

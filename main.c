@@ -72,9 +72,9 @@ int main(int argc, char **argv) {
     import_stub(f);
 
     fclose(f);
-    */
 
     label_print_unused();
+    */
 
     return 0;
 }
