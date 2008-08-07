@@ -197,3 +197,14 @@ void label_print_unused(void) {
         if (o->label[i].count == 0)
             printf("  unused label '%s' at %p\n", o->label[i].name, o->label[i].target);
 }
+
+void label_extern_output(FILE *f) {
+    int i;
+
+    printf("label: writing extern declarations\n");
+
+    for (i = 0; i < o->nlabel; i++) {
+        if (!(o->label[i].type & label_EXTERN)) continue;
+        fprintf(f, "EXTERN %s\n", o->label[i].name);
+    }
+}

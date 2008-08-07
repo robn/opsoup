@@ -118,6 +118,7 @@ void            label_reloc_upgrade(void);
 int             label_print_count(char *str);
 void            label_number(void);
 void            label_print_unused(void);
+void            label_extern_output(FILE *f);
 
 ref_t           *ref_insert(uint8_t *source, uint8_t *target);
 

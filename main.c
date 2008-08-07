@@ -39,6 +39,8 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    label_extern_output(f);
+
     dis_pass3(f);
 
     data_output(f);
