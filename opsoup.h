@@ -47,26 +47,6 @@ typedef struct _reloc_st {
     uint8_t         *target;
 } reloc_t;
 
-typedef struct _opsoup_st {
-    image_t          image;
-
-    reloc_t         *reloc;
-    int              nreloc;
-
-    int              verbose;
-} opsoup_t;
-
-extern opsoup_t *o;
-
-
-int         image_load(void);
-segment_t   *image_seg_find(uint8_t *mem);
-
-
-
-/* labels */
- 
-/* label types */
 typedef enum {
     label_NONE          = 0x0,
 
@@ -96,7 +76,6 @@ typedef struct import_st {
     int             hint;           /* symbol hint for if the symbol name isn't present */
 } import_t;
 
-/* label data */
 typedef struct label_st {
     uint8_t         *target;         /* where this label is located */
     label_type_t    type;           /* its type */
@@ -110,8 +89,24 @@ typedef struct label_st {
     import_t        import;         /* import fu */
 } label_t;
 
-extern label_t  *label;
-extern int      nlabel;
+typedef struct _opsoup_st {
+    image_t          image;
+
+    reloc_t         *reloc;
+    int              nreloc;
+
+    label_t         *label;
+    int             nlabel, slabel;
+    int             added, upgraded;
+
+    int              verbose;
+} opsoup_t;
+
+extern opsoup_t *o;
+
+
+int         image_load(void);
+segment_t   *image_seg_find(uint8_t *mem);
 
 label_t         *label_find(uint8_t *target);
 label_t         *label_insert(uint8_t *target, label_type_t type, segment_t *s);

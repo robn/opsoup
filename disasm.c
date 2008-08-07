@@ -395,9 +395,9 @@ int dis_pass2(int n) {
     n = 0;
 
     /* copy the label array, so we can add to it */
-    nl = nlabel;
+    nl = o->nlabel;
     l = (label_t *) malloc(sizeof(label_t) * nl);
-    memcpy(l, label, sizeof(label_t) * nl);
+    memcpy(l, o->label, sizeof(label_t) * nl);
 
     /* loop the code labels */
     for(i = 0; i < nl; i++) {
@@ -618,18 +618,18 @@ void dis_pass3(FILE *f) {
     fprintf(f, "\nSECTION .text\n");
 
     /* loop the code labels */
-    for(i = 0; i < nlabel; i++) {
-        if(!(label[i].type & label_CODE)) continue;
+    for(i = 0; i < o->nlabel; i++) {
+        if(!(o->label[i].type & label_CODE)) continue;
 
         /* output the label */
-        if (label[i].name)
-            fprintf(f, "\n\n%s:                     ; off = %x\n\n", label[i].name, (uint32_t) (label[i].target - label[i].seg->start));
-        else if((label[i].type & label_CODE_CALL) == label_CODE_CALL)
-            fprintf(f, "\n\nCALL_%06d:                  ; off = %x\n\n", label[i].num, (uint32_t) (label[i].target - label[i].seg->start));
-        else if((label[i].type & label_CODE_JUMP) == label_CODE_JUMP)
-            fprintf(f, "\n\nJUMP_%06d:                  ; off = %x\n\n", label[i].num, (uint32_t) (label[i].target - label[i].seg->start));
+        if (o->label[i].name)
+            fprintf(f, "\n\n%s:                     ; off = %x\n\n", o->label[i].name, (uint32_t) (o->label[i].target - o->label[i].seg->start));
+        else if((o->label[i].type & label_CODE_CALL) == label_CODE_CALL)
+            fprintf(f, "\n\nCALL_%06d:                  ; off = %x\n\n", o->label[i].num, (uint32_t) (o->label[i].target - o->label[i].seg->start));
+        else if((o->label[i].type & label_CODE_JUMP) == label_CODE_JUMP)
+            fprintf(f, "\n\nJUMP_%06d:                  ; off = %x\n\n", o->label[i].num, (uint32_t) (o->label[i].target - o->label[i].seg->start));
 
-        mem = label[i].target;
+        mem = o->label[i].target;
 
         while(1) {
             /* get to the nearest reference from this instruction */
@@ -643,7 +643,7 @@ void dis_pass3(FILE *f) {
                 len = eatbyte(mem, line, sizeof(line));
 
             /* bail if we've gone past the next label */
-            if(mem + len > label[i].seg->end || (i < nlabel - 1 && mem + len > label[i + 1].target))
+            if(mem + len > o->label[i].seg->end || (i < o->nlabel - 1 && mem + len > o->label[i + 1].target))
                 break;
 
             /* turn memory-location-looking arguments into labels */

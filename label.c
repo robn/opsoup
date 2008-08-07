@@ -1,13 +1,9 @@
 #include "opsoup.h"
 
-label_t *label = NULL;
-int nlabel = 0, slabel = 0;
-int added = 0, upgraded = 0;
-
-/* find a label, return its index */
+/* find a o->label, return its index */
 static int _label_find_ll(uint8_t *target) {
-    label_t *l = label;
-    int nl = nlabel, abs = 0, i = 1;
+    label_t *l = o->label;
+    int nl = o->nlabel, abs = 0, i = 1;
 
     if(l == NULL)
         return -1;
@@ -35,7 +31,7 @@ static int _label_find_ll(uint8_t *target) {
     return - (abs + i + 1);
 }
 
-/* find a label and return it */
+/* find a o->label and return it */
 label_t *label_find(uint8_t *target) {
     int i;
 
@@ -43,10 +39,10 @@ label_t *label_find(uint8_t *target) {
     if(i < 0)
         return NULL;
 
-    return &(label[i]);
+    return &(o->label[i]);
 }
 
-/* add a label to the array */
+/* add a o->label to the array */
 label_t *label_insert(uint8_t *target, label_type_t type, segment_t *s) {
     int i;
 
@@ -54,44 +50,44 @@ label_t *label_insert(uint8_t *target, label_type_t type, segment_t *s) {
     if(i < 0) {
         /* not found, search forward for the insertion point */
         i = -i - 1;
-        for(; i < nlabel && label[i].target < target; i++);
+        for(; i < o->nlabel && o->label[i].target < target; i++);
 
         /* make space if necessary */
-        if(nlabel == slabel) {
-            slabel += 1024;
-            label = (label_t *) realloc(label, sizeof(label_t) * slabel);
+        if(o->nlabel == o->slabel) {
+            o->slabel += 1024;
+            o->label = (label_t *) realloc(o->label, sizeof(label_t) * o->slabel);
         }
 
-        if(i < nlabel)
-            memmove(&(label[i + 1]), &(label[i]), sizeof(label_t) * (nlabel - i));
+        if(i < o->nlabel)
+            memmove(&(o->label[i + 1]), &(o->label[i]), sizeof(label_t) * (o->nlabel - i));
 
-        nlabel++;
-        added++;
+        o->nlabel++;
+        o->added++;
 
         /* fill it out */
-        label[i].target = target;
-        label[i].type = type;
-        label[i].seg = s;
-        label[i].num = 0;
+        o->label[i].target = target;
+        o->label[i].type = type;
+        o->label[i].seg = s;
+        o->label[i].num = 0;
 
         if (o->verbose)
             printf("    added label %p type %02x\n", target, type);
     }
 
-    else if((type & ~0xf) > (label[i].type & ~0xf)) {
+    else if((type & ~0xf) > (o->label[i].type & ~0xf)) {
         if(o->verbose)
-            printf("    upgrading %p (%s) from %02x to %02x\n", target, label[i].name ? label[i].name : "(anon)", label[i].type, type);
-        label[i].type = type;
-        upgraded++;
+            printf("    upgrading %p (%s) from %02x to %02x\n", target, o->label[i].name ? o->label[i].name : "(anon)", o->label[i].type, type);
+        o->label[i].type = type;
+        o->upgraded++;
     }
     
     else if (o->verbose)
-        printf ("    reused label %p type %02x\n", label[i].target, label[i].type);
+        printf ("    reused label %p type %02x\n", o->label[i].target, o->label[i].type);
 
-    return &(label[i]);
+    return &(o->label[i]);
 }
 
-/* drop a label */
+/* drop a o->label */
 void label_remove(uint8_t *target) {
     int i;
 
@@ -99,9 +95,9 @@ void label_remove(uint8_t *target) {
     if(i < 0)
         return;
 
-    if(i < nlabel - 1)
-        memmove(&(label[i]), &(label[i + 1]), sizeof(label_t) * (nlabel - i + 1));
-    nlabel--;
+    if(i < o->nlabel - 1)
+        memmove(&(o->label[i]), &(o->label[i + 1]), sizeof(label_t) * (o->nlabel - i + 1));
+    o->nlabel--;
 }
 
 void label_ref_check(void) {
@@ -113,25 +109,25 @@ void label_ref_check(void) {
             (label_find(ref[i].target[j]))->num++;
     
     i = 0;
-    while(i < nlabel) {
-        //if(label[i].type & label_CODE && label[i].num == 0 && label[i].type != label_CODE_ENTRY) {
-        if(label[i].num == 0) {
-            if(i < nlabel - 1)
-                memmove(&(label[i]), &(label[i + 1]), sizeof(label_t) * (nlabel - i + 1));
-            nlabel--;
+    while(i < o->nlabel) {
+        //if(o->label[i].type & label_CODE && o->label[i].num == 0 && o->label[i].type != label_CODE_ENTRY) {
+        if(o->label[i].num == 0) {
+            if(i < o->nlabel - 1)
+                memmove(&(o->label[i]), &(o->label[i + 1]), sizeof(label_t) * (o->nlabel - i + 1));
+            o->nlabel--;
         }
         else
             i++;
     }
 
     /*
-    for(i = 0; i < nlabel; i++)
-        if(label[i].type & label_CODE && label[i].num == 0 && label[i].type != label_CODE_ENTRY) {
-            s = image_seg_find(label[i].target);
+    for(i = 0; i < o->nlabel; i++)
+        if(o->label[i].type & label_CODE && o->label[i].num == 0 && o->label[i].type != label_CODE_ENTRY) {
+            s = image_seg_find(o->label[i].target);
             if(s == NULL || s->type == seg_DATA)
-                label[i].type = label_BSS;
+                o->label[i].type = label_BSS;
             else
-                label[i].type = label_DATA;
+                o->label[i].type = label_DATA;
         }
     */
 }
@@ -141,12 +137,12 @@ void label_reloc_upgrade(void) {
 
     printf("label: upgrading unused reloc labels\n");
 
-    for(i = 0; i < nlabel; i++) {
-        if(!(label[i].type & label_RELOC)) continue;
+    for(i = 0; i < o->nlabel; i++) {
+        if(!(o->label[i].type & label_RELOC)) continue;
         if(o->verbose)
-            printf("  upgrading %p from %02x to %02x\n", label[i].target, label[i].type, label_DATA);
-        label[i].type = label_DATA;
-        upgraded++;
+            printf("  upgrading %p from %02x to %02x\n", o->label[i].target, o->label[i].type, label_DATA);
+        o->label[i].type = label_DATA;
+        o->upgraded++;
     }
 
     label_print_count("label");
@@ -155,38 +151,38 @@ void label_reloc_upgrade(void) {
 int label_print_count(char *str) {
     int changed = 0;
 
-    printf("%s: %d labels added, %d upgraded (%d total)\n", str, added, upgraded, nlabel);
+    printf("%s: %d labels added, %d upgraded (%d total)\n", str, o->added, o->upgraded, o->nlabel);
 
-    if(added != 0 || upgraded != 0)
+    if(o->added != 0 || o->upgraded != 0)
         changed = 1;
 
-    added = upgraded = 0;
+    o->added = o->upgraded = 0;
 
     return changed;
 }
 
-/* number labels */
+/* number o->labels */
 void label_number(void) {
     int i, cc = 0, jc = 0, dc = 0, bc = 0;
 
-    for(i = 0; i < nlabel; i++) {
-        if((label[i].type & label_CODE_CALL) == label_CODE_CALL) {
-            label[i].num = cc;
+    for(i = 0; i < o->nlabel; i++) {
+        if((o->label[i].type & label_CODE_CALL) == label_CODE_CALL) {
+            o->label[i].num = cc;
             cc++;
         }
 
-        else if((label[i].type & label_CODE_JUMP) == label_CODE_JUMP) {
-            label[i].num = jc;
+        else if((o->label[i].type & label_CODE_JUMP) == label_CODE_JUMP) {
+            o->label[i].num = jc;
             jc++;
         }
 
-        else if(label[i].type & label_BSS) {
-            label[i].num = bc;
+        else if(o->label[i].type & label_BSS) {
+            o->label[i].num = bc;
             bc++;
         }
         
-        else if(label[i].type & label_DATA) {
-            label[i].num = dc;
+        else if(o->label[i].type & label_DATA) {
+            o->label[i].num = dc;
             dc++;
         }
     }
@@ -197,7 +193,7 @@ void label_number(void) {
 void label_print_unused(void) {
     int i;
 
-    for (i = 0; i < nlabel; i++)
-        if (label[i].count == 0)
-            printf("  unused label '%s' at %p\n", label[i].name, label[i].target);
+    for (i = 0; i < o->nlabel; i++)
+        if (o->label[i].count == 0)
+            printf("  unused label '%s' at %p\n", o->label[i].name, o->label[i].target);
 }

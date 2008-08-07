@@ -10,23 +10,23 @@ void data_output(FILE *f) {
     fprintf(f, "\n\nSECTION .data\n");
 
     /* loop the data labels */
-    for(i = 0; i < nlabel; i++) {
-        if(!(label[i].type & label_DATA)) continue;
+    for(i = 0; i < o->nlabel; i++) {
+        if(!(o->label[i].type & label_DATA)) continue;
 
         /* output the label */
-        if(label[i].type & label_VTABLE)
+        if(o->label[i].type & label_VTABLE)
             fprintf(f, "\n; vector table\n");
         else
             fprintf(f, "\n");
-        fprintf(f, "DATA_%06d:                  ; off = %x\n", label[i].num, (uint32_t) (label[i].target - label[i].seg->start));
+        fprintf(f, "DATA_%06d:                  ; off = %x\n", o->label[i].num, (uint32_t) (o->label[i].target - o->label[i].seg->start));
 
-        mem = label[i].target;
+        mem = o->label[i].target;
 
         /* where is the next label (or end of segment)? */
-        if(i == nlabel - 1 || label[i].seg != label[i + 1].seg)
-            end = label[i].seg->end;
+        if(i == o->nlabel - 1 || o->label[i].seg != o->label[i + 1].seg)
+            end = o->label[i].seg->end;
         else
-            end = label[i + 1].target;
+            end = o->label[i + 1].target;
 
         /* look for strings */
         s = 0;
@@ -41,7 +41,7 @@ void data_output(FILE *f) {
             }
         }
 
-        if(label[i].type & label_VTABLE) {
+        if(o->label[i].type & label_VTABLE) {
             len = (end - mem) & 0xfffffffc;
 
             while(len > 0) {
@@ -142,23 +142,23 @@ void data_bss_output(FILE *f) {
     fprintf(f, "\n\nSECTION .bss\n");
 
     /* loop the data labels */
-    for(i = 0; i < nlabel; i++) {
-        if(!(label[i].type & label_BSS)) continue;
+    for(i = 0; i < o->nlabel; i++) {
+        if(!(o->label[i].type & label_BSS)) continue;
 
         /* output the label */
-        if(label[i].type & label_VTABLE)
+        if(o->label[i].type & label_VTABLE)
             fprintf(f, "\n; vector table\n");
         else
             fprintf(f, "\n");
-        fprintf(f, "BSS_%06d:                   ; off = %x\n", label[i].num, (uint32_t) (label[i].target - label[i].seg->start));
+        fprintf(f, "BSS_%06d:                   ; off = %x\n", o->label[i].num, (uint32_t) (o->label[i].target - o->label[i].seg->start));
 
-        mem = label[i].target;
+        mem = o->label[i].target;
 
         /* where is the next label (or end of segment)? */
-        if(i == nlabel - 1 || label[i].seg != label[i + 1].seg)
-            end = label[i].seg->start + label[i].seg->size;
+        if(i == o->nlabel - 1 || o->label[i].seg != o->label[i + 1].seg)
+            end = o->label[i].seg->start + o->label[i].seg->size;
         else
-            end = label[i + 1].target;
+            end = o->label[i + 1].target;
 
         /* easy */
         fprintf(f, "    resb 0x%x\n", end - mem);
