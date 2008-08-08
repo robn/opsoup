@@ -134,6 +134,8 @@ void label_gen_names(void) {
     int i, n = 0;
     label_t *l;
 
+    printf("label: generating names for unnamed labels\n");
+
     for (i = 0; i < o->nlabel; i++) {
         if (o->label[i].name != NULL) continue;
 
@@ -149,6 +151,9 @@ void label_gen_names(void) {
             sprintf(l->name, "_OPSOUP_BSS_%06d", n);
         else if(l->type & label_DATA)
             sprintf(l->name, "_OPSOUP_DATA_%06d", n);
+
+        if (o->verbose)
+            printf("  generated name '%s' for label target %p type %x\n", l->name, l->target, l->type);
 
         n++;
     }
