@@ -137,7 +137,7 @@ void label_gen_names(void) {
 
         l = &o->label[i];
 
-        l = malloc(64);
+        l->name = malloc(64);
 
         if((l->type & label_CODE_CALL) == label_CODE_CALL)
             sprintf(l->name, "_OPSOUP_CALL_%06d", n);
