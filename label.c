@@ -68,6 +68,8 @@ label_t *label_insert(uint8_t *target, label_type_t type, segment_t *s) {
         o->label[i].target = target;
         o->label[i].type = type;
         o->label[i].seg = s;
+        o->label[i].count = 0;
+        o->label[i].name = NULL;
 
         if (o->verbose)
             printf("    added label %p type %02x\n", target, type);
