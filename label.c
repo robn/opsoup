@@ -68,7 +68,6 @@ label_t *label_insert(uint8_t *target, label_type_t type, segment_t *s) {
         o->label[i].target = target;
         o->label[i].type = type;
         o->label[i].seg = s;
-        o->label[i].num = 0;
 
         if (o->verbose)
             printf("    added label %p type %02x\n", target, type);
@@ -100,38 +99,6 @@ void label_remove(uint8_t *target) {
     o->nlabel--;
 }
 
-void label_ref_check(void) {
-    int i, j;
-    // segment_t *s;
-
-    for(i = 0; i < o->nref; i++)
-        for(j = 0; j < o->ref[i].ntarget; j++)
-            (label_find(o->ref[i].target[j]))->num++;
-    
-    i = 0;
-    while(i < o->nlabel) {
-        //if(o->label[i].type & label_CODE && o->label[i].num == 0 && o->label[i].type != label_CODE_ENTRY) {
-        if(o->label[i].num == 0) {
-            if(i < o->nlabel - 1)
-                memmove(&(o->label[i]), &(o->label[i + 1]), sizeof(label_t) * (o->nlabel - i + 1));
-            o->nlabel--;
-        }
-        else
-            i++;
-    }
-
-    /*
-    for(i = 0; i < o->nlabel; i++)
-        if(o->label[i].type & label_CODE && o->label[i].num == 0 && o->label[i].type != label_CODE_ENTRY) {
-            s = image_seg_find(o->label[i].target);
-            if(s == NULL || s->type == seg_DATA)
-                o->label[i].type = label_BSS;
-            else
-                o->label[i].type = label_DATA;
-        }
-    */
-}
-
 void label_reloc_upgrade(void) {
     int i;
 
@@ -145,10 +112,10 @@ void label_reloc_upgrade(void) {
         o->upgraded++;
     }
 
-    label_print_count("label");
+    label_print_upgraded("label");
 }
 
-int label_print_count(char *str) {
+int label_print_upgraded(char *str) {
     int changed = 0;
 
     printf("%s: %d labels added, %d upgraded (%d total)\n", str, o->added, o->upgraded, o->nlabel);
@@ -161,30 +128,42 @@ int label_print_count(char *str) {
     return changed;
 }
 
-/* number o->labels */
-void label_number(void) {
+void label_gen_names(void) {
+    int i, n = 0;
+    label_t *l;
+
+    for (i = 0; i < o->nlabel; i++) {
+        if (o->label[i].name != NULL) continue;
+
+        l = &o->label[i];
+
+        l = malloc(64);
+
+        if((l->type & label_CODE_CALL) == label_CODE_CALL)
+            sprintf(l->name, "_OPSOUP_CALL_%06d", n);
+        else if((l->type & label_CODE_JUMP) == label_CODE_JUMP)
+            sprintf(l->name, "_OPSOUP_JUMP_%06d", n);
+        else if(l->type & label_BSS)
+            sprintf(l->name, "_OPSOUP_BSS_%06d", n);
+        else if(l->type & label_DATA)
+            sprintf(l->name, "_OPSOUP_DATA_%06d", n);
+
+        n++;
+    }
+}
+
+void label_print_count(void) {
     int i, cc = 0, jc = 0, dc = 0, bc = 0;
 
     for(i = 0; i < o->nlabel; i++) {
-        if((o->label[i].type & label_CODE_CALL) == label_CODE_CALL) {
-            o->label[i].num = cc;
+        if((o->label[i].type & label_CODE_CALL) == label_CODE_CALL)
             cc++;
-        }
-
-        else if((o->label[i].type & label_CODE_JUMP) == label_CODE_JUMP) {
-            o->label[i].num = jc;
+        else if((o->label[i].type & label_CODE_JUMP) == label_CODE_JUMP)
             jc++;
-        }
-
-        else if(o->label[i].type & label_BSS) {
-            o->label[i].num = bc;
+        else if(o->label[i].type & label_BSS)
             bc++;
-        }
-        
-        else if(o->label[i].type & label_DATA) {
-            o->label[i].num = dc;
+        else if(o->label[i].type & label_DATA)
             dc++;
-        }
     }
     
     printf("labels: call %d jump %d data %d bss %d\n", cc, jc, dc, bc);

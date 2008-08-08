@@ -29,9 +29,7 @@ int main(int argc, char **argv) {
 
     label_reloc_upgrade();
 
-//    label_ref_check();
-
-    label_number();
+    label_gen_names();
 
     f = fopen(OUTPUT_FILE, "w");
     if(f == NULL) {

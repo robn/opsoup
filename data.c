@@ -18,7 +18,7 @@ void data_output(FILE *f) {
             fprintf(f, "\n; vector table\n");
         else
             fprintf(f, "\n");
-        fprintf(f, "DATA_%06d:                  ; off = %x\n", o->label[i].num, (uint32_t) (o->label[i].target - o->label[i].seg->start));
+        fprintf(f, "%s:              ; off = %x\n", o->label[i].name, (uint32_t) (o->label[i].target - o->label[i].seg->start));
 
         mem = o->label[i].target;
 
@@ -46,20 +46,9 @@ void data_output(FILE *f) {
 
             while(len > 0) {
                 l = label_find((uint8_t *) * (uint32_t *) mem);
-                if(l != NULL) {
-                    if((l->type & label_CODE_CALL) == label_CODE_CALL)
-                        fprintf(f, "    dd CALL_%06d\n", l->num);
-                    else if((l->type & label_CODE_JUMP) == label_CODE_JUMP)
-                        fprintf(f, "    dd JUMP_%06d\n", l->num);
-                    else if(l->type & label_BSS)
-                        fprintf(f, "    dd BSS_%06d\n", l->num);
-                    else if(l->type & label_DATA)
-                        fprintf(f, "    dd DATA_%06d\n", l->num);
-                    else
-                        l = NULL;
-                }
-
-                if(l == NULL)
+                if(l != NULL)
+                    fprintf(f, "    dd %s\n", l->name);
+                else
                     fprintf(f, "    db 0x%02x, 0x%02x, 0x%02x, 0x%02x\n", mem[0], mem[1], mem[2], mem[3]);
 
                 mem += 4; len -= 4;
@@ -144,7 +133,7 @@ void data_bss_output(FILE *f) {
             fprintf(f, "\n; vector table\n");
         else
             fprintf(f, "\n");
-        fprintf(f, "BSS_%06d:                   ; off = %x\n", o->label[i].num, (uint32_t) (o->label[i].target - o->label[i].seg->start));
+        fprintf(f, "%s:              ; off = %x\n", o->label[i].name, (uint32_t) (o->label[i].target - o->label[i].seg->start));
 
         mem = o->label[i].target;
 

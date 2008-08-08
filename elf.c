@@ -266,7 +266,7 @@ int elf_relocate(opsoup_t *o) {
             */
         }
 
-        label_print_count("reloc");
+        label_print_upgraded("reloc");
     }
 
     return 0;

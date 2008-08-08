@@ -379,7 +379,7 @@ void dis_pass1(void) {
         }
     }
 
-    label_print_count("dis1");
+    label_print_upgraded("dis1");
 }
 
 int dis_pass2(int n) {
@@ -604,7 +604,7 @@ int dis_pass2(int n) {
 
     free(l);
 
-    return label_print_count("dis2");
+    return label_print_upgraded("dis2");
 }
 
 void dis_pass3(FILE *f) {
@@ -622,12 +622,7 @@ void dis_pass3(FILE *f) {
         if(!(o->label[i].type & label_CODE)) continue;
 
         /* output the label */
-        if (o->label[i].name)
-            fprintf(f, "\n\n%s:                     ; off = %x\n\n", o->label[i].name, (uint32_t) (o->label[i].target - o->label[i].seg->start));
-        else if((o->label[i].type & label_CODE_CALL) == label_CODE_CALL)
-            fprintf(f, "\n\nCALL_%06d:                  ; off = %x\n\n", o->label[i].num, (uint32_t) (o->label[i].target - o->label[i].seg->start));
-        else if((o->label[i].type & label_CODE_JUMP) == label_CODE_JUMP)
-            fprintf(f, "\n\nJUMP_%06d:                  ; off = %x\n\n", o->label[i].num, (uint32_t) (o->label[i].target - o->label[i].seg->start));
+        fprintf(f, "\n\n%s:                     ; off = %x\n\n", o->label[i].name, (uint32_t) (o->label[i].target - o->label[i].seg->start));
 
         mem = o->label[i].target;
 
@@ -688,20 +683,11 @@ void dis_pass3(FILE *f) {
                     continue;
                 }
 
+                l->count++;
+
                 *num = '\0';
 
-                if (l->name)
-                    sprintf(line2, "%s%s", line, l->name);
-                else if((l->type & label_CODE_CALL) == label_CODE_CALL)
-                    sprintf(line2, "%sCALL_%06d", line, l->num);
-                else if((l->type & label_CODE_JUMP) == label_CODE_JUMP)
-                    sprintf(line2, "%sJUMP_%06d", line, l->num);
-                else if(l->type & label_BSS)
-                    sprintf(line2, "%sBSS_%06d", line, l->num);
-                else if(l->type & label_DATA)
-                    sprintf(line2, "%sDATA_%06d", line, l->num);
-
-                l->count++;
+                sprintf(line2, "%s%s", line, l->name);
 
                 /* keep track of the start of the rest of the line, so we can get more numbers */
                 pos = strchr(line2, '\0');
