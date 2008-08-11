@@ -244,9 +244,9 @@ void dis_pass1(void) {
 
                 /*
                 else {
-                    printf("\n           reloc: 0x%x\n", o->reloc[ir].mem);
-                    printf("          offset: 0x%x\n", mem);
-                    printf("          target: 0x%x (%s)\n", target, s->name);
+                    printf("\n           reloc: 0x%x (%p)\n", ir, o->reloc[ir].mem);
+                    printf("          offset: 0x%x\n", mem - o->image.segment[i].start);
+                    printf("          target: %p (segment '%s')\n", target, s->name);
                     printf("     instruction: %s\n", line);
                     printf("           bytes:");
 
@@ -260,7 +260,7 @@ void dis_pass1(void) {
 
                     printf("\n\n");
 
-                    abort();
+                    asm("int3");
                 }
                 */
             }
@@ -467,9 +467,9 @@ int dis_pass2(int n) {
 
                 /*
                 else {
-                    printf("\n           reloc: 0x%x\n", o->reloc[ir].mem);
-                    printf("          offset: 0x%x\n", mem);
-                    printf("          target: 0x%x (%s)\n", target, s->name);
+                    printf("\n           reloc: 0x%x (%p)\n", ir, o->reloc[ir].mem);
+                    printf("          offset: 0x%x\n", mem - o->image.segment[i].start);
+                    printf("          target: %p (segment '%s')\n", target, s->name);
                     printf("     instruction: %s\n", line);
                     printf("           bytes:");
 
@@ -483,7 +483,7 @@ int dis_pass2(int n) {
 
                     printf("\n\n");
 
-                    abort();
+                    asm("int3");
                 }
                 */
             }
