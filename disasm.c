@@ -215,6 +215,8 @@ void dis_pass1(void) {
                     continue;
                 }
 
+                type = label_NONE;
+
                 /* if it points to a data or bss segment, its data */
                 if(s->type == seg_BSS)
                     type = label_BSS;
@@ -231,15 +233,17 @@ void dis_pass1(void) {
                 }
 
                 /* some normal memory access */
+                /* !!!
                 else if(_mem_access(mem)) {
                     if(type & label_BSS)
                         type = label_BSS;
                     else
                         type = label_DATA;
                 }
+                */
 
                 /* nfi, call it data */
-                else
+                else if (type == label_NONE)
                     type = label_DATA;
 
                 /*
@@ -438,6 +442,8 @@ int dis_pass2(int n) {
                     continue;
                 }
 
+                type = label_NONE;
+
                 /* if it points to a data or bss segment, its data */
                 if(s->type == seg_BSS)
                     type = label_BSS;
@@ -454,15 +460,17 @@ int dis_pass2(int n) {
                 }
 
                 /* some normal memory access */
+                /* !!!
                 else if(_mem_access(mem)) {
                     if(type & label_BSS)
                         type = label_BSS_VTABLE;
                     else
                         type = label_DATA_VTABLE;
                 }
+                */
 
                 /* nfi, call it data */
-                else
+                else if (type == label_NONE)
                     type = label_DATA;
 
                 /*
