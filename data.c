@@ -18,7 +18,7 @@ void data_output(FILE *f) {
             fprintf(f, "\n; vector table\n");
         else
             fprintf(f, "\n");
-        fprintf(f, "%s:              ; off = %x\n", o->label[i].name, (uint32_t) (o->label[i].target - o->label[i].seg->start));
+        fprintf(f, "%s:              ; %s %x \n", o->label[i].name, o->label[i].seg->name, (uint32_t) (o->label[i].target - o->label[i].seg->start));
 
         mem = o->label[i].target;
 
@@ -133,7 +133,7 @@ void data_bss_output(FILE *f) {
             fprintf(f, "\n; vector table\n");
         else
             fprintf(f, "\n");
-        fprintf(f, "%s:              ; off = %x\n", o->label[i].name, (uint32_t) (o->label[i].target - o->label[i].seg->start));
+        fprintf(f, "%s:              ; %s %x \n", o->label[i].name, o->label[i].seg->name, (uint32_t) (o->label[i].target - o->label[i].seg->start));
 
         mem = o->label[i].target;
 

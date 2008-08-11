@@ -630,7 +630,7 @@ void dis_pass3(FILE *f) {
         if(!(o->label[i].type & label_CODE)) continue;
 
         /* output the label */
-        fprintf(f, "\n\n%s:                     ; off = %x\n\n", o->label[i].name, (uint32_t) (o->label[i].target - o->label[i].seg->start));
+        fprintf(f, "\n\n%s:                     ; %s %x \n\n", o->label[i].name, o->label[i].seg->name, (uint32_t) (o->label[i].target - o->label[i].seg->start));
 
         mem = o->label[i].target;
 
