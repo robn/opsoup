@@ -159,6 +159,24 @@ void label_gen_names(void) {
     }
 }
 
+static int _label_target_compare(const void *a, const void *b) {
+    label_t *l1, *l2;
+
+    l1 = (label_t *) a;
+    l2 = (label_t *) b;
+    
+    if (l1->seg != l2->seg)
+        return l1->seg->start < l2->seg->start ? -1 : 1;
+
+    return l1->target < l2->target ? -1 : l1->target == l2->target ? 0 : 1;
+}
+
+void label_sort(void) {
+    printf("label: sorting labels\n");
+
+    qsort(o->label, o->nlabel, sizeof (label_t), _label_target_compare);
+}
+
 void label_print_count(void) {
     int i, cc = 0, jc = 0, dc = 0, bc = 0;
 

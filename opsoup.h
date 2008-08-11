@@ -115,6 +115,7 @@ void            label_remove(uint8_t *target);
 void            label_reloc_upgrade(void);
 int             label_print_upgraded(char *str);
 void            label_gen_names(void);
+void            label_sort(void);
 void            label_print_count(void);
 void            label_print_unused(void);
 void            label_extern_output(FILE *f);
