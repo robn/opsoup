@@ -1,4 +1,4 @@
-NASM_PATH = /home/rob/code/asm/nasm-2.03.01
+NASM_PATH = nasm-2.03.01
 
 CC = gcc
 CFLAGS = -Wall -ggdb -I$(NASM_PATH)
